@@ -15,6 +15,7 @@
             touch-action: manipulation; /* Позволяет тач-управление, предотвращает выделение */
             -webkit-tap-highlight-color: transparent; /* Убирает синий эффект при касании */
             outline: none;
+            
         }
 
         #3d-viewer canvas {
@@ -27,6 +28,11 @@
             -webkit-tap-highlight-color: transparent; /* Убирает синий эффект при тапах */
             touch-action: none; /* Отключает все стандартные жесты */
             outline: none; /* Убирает обводку вокруг элемента */
+            -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer */
+   -khtml-user-select: none; /* KHTML browsers (наподобие Konqueror) */
+  -webkit-user-select: none; /* Chrome, Safari и Opera */
+  -webkit-touch-callout: none; /* Отключить вызовы в Android и iOS */
         }
 
         .cursor-pointer {
