@@ -643,6 +643,8 @@
 
         function onTouchStart(event) {
 
+            console.log('Сообщение для отладки');
+document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение для отладки' + '</div>');
             if (event.touches.length === 1) {
               
                 var touch = event.touches[0];
