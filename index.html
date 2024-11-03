@@ -13,28 +13,21 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            touch-action: manipulation; /* Позволяет тач-управление, предотвращает выделение */
+            touch-action: manipulation;
             -webkit-tap-highlight-color: transparent; /* Убирает синий эффект при касании */
             outline: none;
-            
         }
 
         #3d-viewer canvas {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            -webkit-user-select: none; /* Отключает выделение на iOS и Android */
-            -ms-user-select: none; /* Отключает выделение на старых версиях IE */
             user-select: none; /* Отключает выделение в современных браузерах */
-            -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
--webkit-tap-highlight-color: transparent;
-            touch-action: none; /* Отключает все стандартные жесты */
-            outline: none; /* Убирает обводку вокруг элемента */
+            -webkit-user-select: none; /* Chrome, Safari и Opera */
             -moz-user-select: none; /* Firefox */
-      -ms-user-select: none; /* Internet Explorer */
-   -khtml-user-select: none; /* KHTML browsers (наподобие Konqueror) */
-  -webkit-user-select: none; /* Chrome, Safari и Opera */
-  -webkit-touch-callout: none; /* Отключить вызовы в Android и iOS */
+            -ms-user-select: none; /* Internet Explorer */
+            -khtml-user-select: none; /* KHTML browsers (например, Konqueror) */
+            -webkit-touch-callout: none; /* Отключить вызовы в Android и iOS */
         }
 
         .cursor-pointer {
@@ -99,7 +92,7 @@
         // var renderWidth = 1920;
         // var renderHeight = 800;
 
-        
+
         var renderWidth = container.clientWidth/* * 0.75*/;
         var renderHeight = container.clientHeight /** 0.75*/;
         var camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 200);
@@ -351,20 +344,20 @@
 
 
         // Создаем камеру для карты (вид сверху)
-      /*  const mapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 100);
-        mapCamera.position.set(0, 2.5, 0); // Камера расположена высоко и смотрит вниз
-        mapCamera.layers.enable(1);
-        mapCamera.lookAt(0, 0, 0); // Смотрит на центр сцены
-
-        // Создаем рендер для миникарты
-        const mapRenderer = new THREE.WebGLRenderer({ }); // Используйте alpha, если хотите видеть прозрачный фон
-      /*  mapRenderer.setSize(250, 250); // Размер карты
-        mapRenderer.domElement.style.position = 'absolute'; // Позиционирование миникарты
-        mapRenderer.domElement.style.top = '10px'; // Расположение снизу
-        mapRenderer.domElement.style.left = '10px'; // Расположение слева
-        mapRenderer.domElement.style.pointerEvents = 'none'; // Отключаем взаимодействие с миникартой
-        container.appendChild(mapRenderer.domElement); // Добавляем миникарту в контейнер
-*/
+        /*  const mapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 100);
+          mapCamera.position.set(0, 2.5, 0); // Камера расположена высоко и смотрит вниз
+          mapCamera.layers.enable(1);
+          mapCamera.lookAt(0, 0, 0); // Смотрит на центр сцены
+  
+          // Создаем рендер для миникарты
+          const mapRenderer = new THREE.WebGLRenderer({ }); // Используйте alpha, если хотите видеть прозрачный фон
+        /*  mapRenderer.setSize(250, 250); // Размер карты
+          mapRenderer.domElement.style.position = 'absolute'; // Позиционирование миникарты
+          mapRenderer.domElement.style.top = '10px'; // Расположение снизу
+          mapRenderer.domElement.style.left = '10px'; // Расположение слева
+          mapRenderer.domElement.style.pointerEvents = 'none'; // Отключаем взаимодействие с миникартой
+          container.appendChild(mapRenderer.domElement); // Добавляем миникарту в контейнер
+  */
 
         // Создаем материал для круга
         const circleMaterial1 = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // 
@@ -649,9 +642,9 @@
         }
 
         function onTouchStart(event) {
-          
+
             if (event.touches.length === 1) {
-              
+                event.preventDefault(); // Предотвращаем стандартное поведение
                 var touch = event.touches[0];
                 touchStartX = touch.clientX;
                 touchStartY = touch.clientY;
@@ -663,10 +656,10 @@
         }
 
         function onTouchMove(event) {
-            
+
             if (event.touches.length === 1 && isMouseDown) {
-               
-                event.preventDefault(); // Предотвращаем стандартное поведение
+
+             
                 var touch = event.touches[0];
                 var deltaX = touch.clientX - touchStartX;
                 var deltaY = touch.clientY - touchStartY;
@@ -695,7 +688,7 @@
         }
 
         function onTouchEnd(event) {
-           
+
             if (event.changedTouches.length === 1) {
                 isMouseDown = false;
                 container.classList.remove('cursor-clicking');
@@ -755,10 +748,10 @@
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
             // Обновляем маркер камеры
-           // updateCameraMarker();
+            // updateCameraMarker();
 
             // Рендер сцены для карты (вид сверху)
-           // mapRenderer.render(scene, mapCamera);
+            // mapRenderer.render(scene, mapCamera);
             stats.end(); // Конец измерения производительности
         }
 
