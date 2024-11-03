@@ -14,7 +14,8 @@
             height: 100%;
             overflow: hidden;
             touch-action: none;
-            -webkit-tap-highlight-color: transparent; /* Убирает синий эффект при касании */
+            -webkit-tap-highlight-color: transparent;
+            /* Убирает синий эффект при касании */
             outline: none;
         }
 
@@ -22,12 +23,18 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            user-select: none; /* Отключает выделение в современных браузерах */
-            -webkit-user-select: none; /* Chrome, Safari и Opera */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer */
-            -khtml-user-select: none; /* KHTML browsers (например, Konqueror) */
-            -webkit-touch-callout: none; /* Отключить вызовы в Android и iOS */
+            user-select: none;
+            /* Отключает выделение в современных браузерах */
+            -webkit-user-select: none;
+            /* Chrome, Safari и Opera */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* Internet Explorer */
+            -khtml-user-select: none;
+            /* KHTML browsers (например, Konqueror) */
+            -webkit-touch-callout: none;
+            /* Отключить вызовы в Android и iOS */
         }
 
         .cursor-pointer {
@@ -643,10 +650,11 @@
 
         function onTouchStart(event) {
 
-            console.log('Сообщение для отладки');
-document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение для отладки' + '</div>');
+          
             if (event.touches.length === 1) {
-              
+
+                console.log('Сообщение для отладки');
+                document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение для отладки' + '</div>');
                 var touch = event.touches[0];
                 touchStartX = touch.clientX;
                 touchStartY = touch.clientY;
@@ -655,7 +663,11 @@ document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение дл
                 mouseDownTime = performance.now();
                 container.classList.add('cursor-clicking');
                 //event.preventDefault();
-               
+
+            }
+            else{
+                console.log('Сообщение для отладки2');
+                document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение для отладки2' + '</div>');
             }
         }
 
@@ -663,7 +675,7 @@ document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение дл
 
             if (event.touches.length === 1 && isMouseDown) {
 
-             
+
                 var touch = event.touches[0];
                 var deltaX = touch.clientX - touchStartX;
                 var deltaY = touch.clientY - touchStartY;
