@@ -14,36 +14,31 @@
             height: 100%;
             overflow: hidden;
             touch-action: none;
+            /* Отключаем стандартное поведение касания */
             -webkit-tap-highlight-color: transparent;
-            /* Убирает синий эффект при касании */
+            /* Убирает синий эффект */
             outline: none;
         }
 
         #3d-viewer canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            user-select: none;
-            /* Отключает выделение в современных браузерах */
-            -webkit-user-select: none;
-            /* Chrome, Safari и Opera */
-            -moz-user-select: none;
-            /* Firefox */
-            -ms-user-select: none;
-            /* Internet Explorer */
-            -khtml-user-select: none;
-            /* KHTML browsers (например, Konqueror) */
-            -webkit-touch-callout: none;
-            /* Отключить вызовы в Android и iOS */
-        }
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        user-select: none; /* Отключаем выделение */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -khtml-user-select: none;
+        -webkit-touch-callout: none; /* Отключаем вызовы в Android и iOS */
+    }
 
-        .cursor-pointer {
+       /* .cursor-pointer {
             cursor: pointer;
         }
 
         .cursor-clicking {
             cursor: grabbing;
-        }
+        }*/
     </style>
 </head>
 
@@ -650,9 +645,9 @@
 
         function onTouchStart(event) {
 
-          
+
             if (event.touches.length === 1) {
-                
+
                 var touch = event.touches[0];
                 touchStartX = touch.clientX;
                 touchStartY = touch.clientY;
@@ -663,7 +658,7 @@
                 //event.preventDefault();
 
             }
-            
+
         }
 
         function onTouchMove(event) {
