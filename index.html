@@ -35,35 +35,35 @@
 <body>
     <div id="3d-viewer" style="width: 100%; height: 80vh;"></div>
 
-    <label>
+    <label style="display: none;">
         Показать пол
         <input type="checkbox" id="floorCheckbox" />
     </label>
 
-    <label>
+    <label style="display: none;">
         Включить фон
         <input type="checkbox" id="backgroundCheckbox" />
     </label>
 
     <input type="color" id="colorPicker" value="#87CEEB" style="display: none;" />
 
-    <label>
+    <label style="display: none;">
         Угол обзора (FOV)
         <input type="range" id="fovSlider" min="30" max="120" value="75" step="1" />
         <span id="fovValue">75</span>
     </label>
 
-    <label>
+    <label style="display: none;">
         Загрузить GLB
         <input type="file" id="fileInput" accept=".glb" />
     </label>
 
-    <label>
+    <label style="display: none;">
         Загрузить HDRI
         <input type="file" id="hdriInput" accept=".exr" />
     </label>
 
-    <label>
+    <label style="display: none;">
         Экспозиция HDRI
         <input type="range" id="exposureSlider" min="0.1" max="5" value="1" step="0.1" />
         <span id="exposureValue">1</span>
