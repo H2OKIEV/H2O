@@ -24,6 +24,7 @@
         user-select: none;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         outline: none;
+        touch-action: none; /* Запрещает стандартные жесты браузера */
     }
 
         .cursor-pointer {
@@ -640,7 +641,7 @@
         function onTouchStart(event) {
           
             if (event.touches.length === 1) {
-                event.preventDefault(); // Останавливает поведение по умолчанию
+              
                 var touch = event.touches[0];
                 touchStartX = touch.clientX;
                 touchStartY = touch.clientY;
@@ -654,7 +655,7 @@
         function onTouchMove(event) {
             
             if (event.touches.length === 1 && isMouseDown) {
-                event.preventDefault(); // Останавливает поведение по умолчанию
+               
                 var touch = event.touches[0];
                 var deltaX = touch.clientX - touchStartX;
                 var deltaY = touch.clientY - touchStartY;
