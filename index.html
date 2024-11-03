@@ -658,6 +658,7 @@
             
             if (event.touches.length === 1 && isMouseDown) {
                
+                event.preventDefault(); // Предотвращаем стандартное поведение
                 var touch = event.touches[0];
                 var deltaX = touch.clientX - touchStartX;
                 var deltaY = touch.clientY - touchStartY;
