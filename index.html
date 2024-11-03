@@ -638,8 +638,9 @@
         }
 
         function onTouchStart(event) {
-            event.preventDefault(); // Останавливает поведение по умолчанию
+          
             if (event.touches.length === 1) {
+                event.preventDefault(); // Останавливает поведение по умолчанию
                 var touch = event.touches[0];
                 touchStartX = touch.clientX;
                 touchStartY = touch.clientY;
@@ -651,8 +652,9 @@
         }
 
         function onTouchMove(event) {
-            event.preventDefault(); // Останавливает поведение по умолчанию
+            
             if (event.touches.length === 1 && isMouseDown) {
+                event.preventDefault(); // Останавливает поведение по умолчанию
                 var touch = event.touches[0];
                 var deltaX = touch.clientX - touchStartX;
                 var deltaY = touch.clientY - touchStartY;
@@ -681,7 +683,7 @@
         }
 
         function onTouchEnd(event) {
-            event.preventDefault(); // Останавливает поведение по умолчанию
+           
             if (event.changedTouches.length === 1) {
                 isMouseDown = false;
                 container.classList.remove('cursor-clicking');
