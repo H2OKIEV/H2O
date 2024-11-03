@@ -652,9 +652,7 @@
 
           
             if (event.touches.length === 1) {
-
-                console.log('Сообщение для отладки');
-                document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение для отладки' + '</div>');
+                
                 var touch = event.touches[0];
                 touchStartX = touch.clientX;
                 touchStartY = touch.clientY;
@@ -662,13 +660,10 @@
                 mouseMoved = false;
                 mouseDownTime = performance.now();
                 container.classList.add('cursor-clicking');
-                //event.preventDefault();
+                event.preventDefault();
 
             }
-            else{
-                console.log('Сообщение для отладки2');
-                document.body.insertAdjacentHTML('beforeend', '<div>' + 'Сообщение для отладки2' + '</div>');
-            }
+            
         }
 
         function onTouchMove(event) {
@@ -700,6 +695,7 @@
                 touchStartY = touch.clientY;
 
                 mouseMoved = true;
+                event.preventDefault();
             }
         }
 
