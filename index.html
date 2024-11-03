@@ -10,17 +10,21 @@
             cursor: grab;
             position: relative;
             width: 100%;
-            height: 80vh;
+            height: 100%;
             overflow: hidden;
             /* Добавлено, чтобы скрыть лишние части */
         }
 
         #3d-viewer canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Растягиваем изображение, чтобы оно заполнило контейнер */
-        }
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        outline: none;
+    }
 
         .cursor-pointer {
             cursor: pointer;
@@ -33,7 +37,7 @@
 </head>
 
 <body>
-    <div id="3d-viewer" style="width: 100%; height: 80vh;"></div>
+    <div id="3d-viewer" style="width: 100%; height: 97vh;"></div>
 
     <label style="display: none;">
         Показать пол
