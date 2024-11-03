@@ -13,7 +13,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            touch-action: manipulation;
+            touch-action: none;
             -webkit-tap-highlight-color: transparent; /* Убирает синий эффект при касании */
             outline: none;
         }
@@ -652,7 +652,8 @@
                 mouseMoved = false;
                 mouseDownTime = performance.now();
                 container.classList.add('cursor-clicking');
-                //event.preventDefault(); // Предотвращаем стандартное поведение
+                event.preventDefault();
+               
             }
         }
 
