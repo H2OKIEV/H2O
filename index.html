@@ -644,7 +644,7 @@
         function onTouchStart(event) {
 
             if (event.touches.length === 1) {
-                event.preventDefault(); // Предотвращаем стандартное поведение
+              
                 var touch = event.touches[0];
                 touchStartX = touch.clientX;
                 touchStartY = touch.clientY;
@@ -652,6 +652,7 @@
                 mouseMoved = false;
                 mouseDownTime = performance.now();
                 container.classList.add('cursor-clicking');
+                event.preventDefault(); // Предотвращаем стандартное поведение
             }
         }
 
