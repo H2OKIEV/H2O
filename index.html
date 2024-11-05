@@ -603,9 +603,7 @@
             animateMovement();
         }
 
-
-        var yaw = 0;
-        var pitch = 0;
+       
 
         function init() {
             // ... ваш код инициализации сцены, камеры и рендерера ...          
@@ -617,6 +615,10 @@
             });
         }
 
+        var cameraRotation = new THREE.Euler().setFromQuaternion(camera.quaternion, 'XYZ');
+        var yaw = cameraRotation.y;
+        var pitch = cameraRotation.x;
+        
         function onDocumentMouseMove(event) {
             if (isMouseDown) {
                 var deltaX = event.clientX - prevMouseX;
