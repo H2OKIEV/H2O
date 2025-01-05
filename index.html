@@ -720,16 +720,24 @@
         // Создание Raycaster для обнаружения столкновений
 
         const collisionDistance = 0.5; // Минимальное расстояние до объекта
+const rayHeightSteps = 5; // Количество проверок по высоте
+const rayHeightInterval = 0.2; // Интервал между лучами по высоте
 
-        function checkCollisions(direction) {
-            raycaster.set(camera.position, direction.normalize());
-            const intersects = raycaster.intersectObjects(scene.children, true);
+function checkCollisions(direction) {
+    for (let i = 0; i < rayHeightSteps; i++) {
+        // Смещаем положение луча вверх на определенную высоту
+        const rayOrigin = camera.position.clone();
+        rayOrigin.y -= i * rayHeightInterval;
 
-            if (intersects.length > 0 && intersects[0].distance < collisionDistance) {
-                return true; // Обнаружено столкновение
-            }
-            return false;
+        raycaster.set(rayOrigin, direction.normalize());
+        const intersects = raycaster.intersectObjects(scene.children, true);
+
+        if (intersects.length > 0 && intersects[0].distance < collisionDistance) {
+            return true; // Обнаружено столкновение
         }
+    }
+    return false; // Столкновений нет
+}
 
         // Обновление позиции камеры
         function updateCameraPosition() {
