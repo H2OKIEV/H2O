@@ -47,9 +47,9 @@
 <body>
     <div id="3d-viewer" style="width: 100%; height: 97vh;"></div>
 
-   
-   
-   
+
+
+
 
     <label style="display: none;">
         Угол обзора (FOV)
@@ -83,7 +83,7 @@
         var scene = new THREE.Scene();
         var container = document.getElementById('3d-viewer');
 
-        var renderWidth = container.clientWidth ;
+        var renderWidth = container.clientWidth;
         var renderHeight = container.clientHeight;
         var camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 200);
 
@@ -104,7 +104,7 @@
         console.log('Текущая высота рендера:', size.height);
 
         //renderer.shadowMap.enabled = true; // Включаем карту теней
-       // renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)
+        // renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)
         // Установите начальное значение экспозиции
         renderer.toneMapping = THREE.ReinhardToneMapping;
         renderer.toneMappingExposure = parseFloat(exposureSlider.value);
@@ -117,17 +117,17 @@
         pmremGenerator.compileEquirectangularShader();
         const environment = new THREE.RoomEnvironment();
         var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
-        scene.environment = defaultEnvMap;      
+        scene.environment = defaultEnvMap;
 
         var stats = new Stats();
         stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
         document.body.appendChild(stats.dom);
 
         // Добавляем окружающий свет
-      /*  const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
-        scene.add(ambientLight); */   
+        /*  const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+          scene.add(ambientLight); */
 
-       
+
 
         var loader = new THREE.GLTFLoader();
 
@@ -215,29 +215,29 @@
                 reader.readAsArrayBuffer(file);
             }
         });
-        
 
-        
+
+
         var cameraHeight = 1.5;
         camera.position.set(1, cameraHeight, 1);
         camera.lookAt(3, cameraHeight, 1);
 
 
         // Создаем камеру для карты (вид сверху)
-      /*    const mapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 100);
-          mapCamera.position.set(0, 2.5, 0); // Камера расположена высоко и смотрит вниз
-          mapCamera.layers.enable(1);
-          mapCamera.lookAt(0, 0, 0); // Смотрит на центр сцены
-  
-          // Создаем рендер для миникарты
-          const mapRenderer = new THREE.WebGLRenderer({ }); // Используйте alpha, если хотите видеть прозрачный фон
-          mapRenderer.setSize(250, 250); // Размер карты
-          mapRenderer.domElement.style.position = 'absolute'; // Позиционирование миникарты
-          mapRenderer.domElement.style.top = '10px'; // Расположение снизу
-          mapRenderer.domElement.style.left = '10px'; // Расположение слева
-          mapRenderer.domElement.style.pointerEvents = 'none'; // Отключаем взаимодействие с миникартой
-          container.appendChild(mapRenderer.domElement); // Добавляем миникарту в контейнер
-          */  
+        /*    const mapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 100);
+            mapCamera.position.set(0, 2.5, 0); // Камера расположена высоко и смотрит вниз
+            mapCamera.layers.enable(1);
+            mapCamera.lookAt(0, 0, 0); // Смотрит на центр сцены
+    
+            // Создаем рендер для миникарты
+            const mapRenderer = new THREE.WebGLRenderer({ }); // Используйте alpha, если хотите видеть прозрачный фон
+            mapRenderer.setSize(250, 250); // Размер карты
+            mapRenderer.domElement.style.position = 'absolute'; // Позиционирование миникарты
+            mapRenderer.domElement.style.top = '10px'; // Расположение снизу
+            mapRenderer.domElement.style.left = '10px'; // Расположение слева
+            mapRenderer.domElement.style.pointerEvents = 'none'; // Отключаем взаимодействие с миникартой
+            container.appendChild(mapRenderer.domElement); // Добавляем миникарту в контейнер
+            */
 
         // Создаем материал для круга
         const circleMaterial1 = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // 
@@ -259,7 +259,7 @@
             circleMesh.position.set(camera.position.x, 0.1, camera.position.z);
         }
 
-        
+
         var raycaster = new THREE.Raycaster();
         var mouse = new THREE.Vector2();
 
@@ -328,33 +328,13 @@
 
                 // Устанавливаем позицию круга на точку пересечения
                 circle.position.copy(intersect.point);
+                const normal = intersect.face.normal.clone(); // Нормаль поверхности
 
-                // Получаем нормаль к поверхности
-                const normal = intersect.face.normal.clone();
-
-                // Выводим отладочную информацию
-                // console.log('Intersection point:', intersect.point);
-                // console.log('Intersection normal:', normal);
-
-                // Инициализируем вектор "вверх"
-                let up = new THREE.Vector3(0, 1, 0);
-
-                // Если нормаль направлена вдоль оси X
-                if (Math.abs(normal.x) > 0.9) {
-                    // Используем ось Z как "вверх" для поверхностей, направленных вдоль оси X
-                    up = new THREE.Vector3(0, 0, 1);
-                }
-                // Если нормаль направлена вдоль оси Z (например, {x: 0, y: 0, z: -1})
-                else if (Math.abs(normal.z) > 0.9) {
-                    // Используем ось Y как "вверх", чтобы круг правильно ориентировался по Z
-                    up = new THREE.Vector3(0, 1, 0);
-                }
-
-                // Рассчитываем кватернион на основе нормали
-                const quaternion = new THREE.Quaternion();
-                quaternion.setFromUnitVectors(up, normal);
-
-                // Применяем рассчитанный поворот
+                // Поворачиваем круг в направлении нормали
+                const quaternion = new THREE.Quaternion().setFromUnitVectors(
+                    new THREE.Vector3(0, 0, 1), // Ось нормали по умолчанию
+                    normal.normalize() // Нормаль к поверхности
+                );
                 circle.quaternion.copy(quaternion);
 
                 // Делаем круг видимым
@@ -416,61 +396,61 @@
             }
         }
 
-// Переменные для визуализации raycast
-let rayLine;
-const rayLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Красный цвет для линии
-const rayLineGeometry = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(0, 0, 0),  // Начальная точка
-    new THREE.Vector3(0, 0, 0)   // Конечная точка
-]);
+        // Переменные для визуализации raycast
+        let rayLine;
+        const rayLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Красный цвет для линии
+        const rayLineGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, 0, 0),  // Начальная точка
+            new THREE.Vector3(0, 0, 0)   // Конечная точка
+        ]);
 
-// Создаем линию и добавляем ее в сцену
-rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
-scene.add(rayLine);
+        // Создаем линию и добавляем ее в сцену
+        rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
+        scene.add(rayLine);
 
 
-       function onClick(event) {
-    // Вычисление координат мыши
-    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-    mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+        function onClick(event) {
+            // Вычисление координат мыши
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
 
-    // Установка луча
-    raycaster.setFromCamera(mouse, camera);
+            // Установка луча
+            raycaster.setFromCamera(mouse, camera);
 
-    // Обновление линии для визуализации
-    const rayStart = raycaster.ray.origin.clone(); // Начало луча (камера)
-    let rayEnd; // Конец луча
+            // Обновление линии для визуализации
+            const rayStart = raycaster.ray.origin.clone(); // Начало луча (камера)
+            let rayEnd; // Конец луча
 
-    // Проверка пересечений
-    const intersects = raycaster.intersectObjects(
-        scene.children.filter(obj => obj !== circle), // Исключаем объект, если нужно
-        true
-    );
+            // Проверка пересечений
+            const intersects = raycaster.intersectObjects(
+                scene.children.filter(obj => obj !== circle), // Исключаем объект, если нужно
+                true
+            );
 
-    if (intersects.length > 0) {
-        // Точка пересечения
-        rayEnd = intersects[0].point.clone(); 
-    } else {
-        // Если пересечений нет, линия до максимальной длины
-        rayEnd = rayStart.clone().add(raycaster.ray.direction.clone().multiplyScalar(100));
-    }
+            if (intersects.length > 0) {
+                // Точка пересечения
+                rayEnd = intersects[0].point.clone();
+            } else {
+                // Если пересечений нет, линия до максимальной длины
+                rayEnd = rayStart.clone().add(raycaster.ray.direction.clone().multiplyScalar(100));
+            }
 
-    // Обновление геометрии линии
-   // rayLineGeometry.setFromPoints([rayStart, rayEnd]);
+            // Обновление геометрии линии
+            // rayLineGeometry.setFromPoints([rayStart, rayEnd]);
 
-    if (intersects.length > 0) {
-        const intersectPoint = intersects[0].point;
-        intersectPoint.y = cameraHeight;
-        moveToPosition(intersectPoint); // Движение к точке пересечения
-    } else {
-        console.log('Нет пересечений');
-    }
-}
-      
+            if (intersects.length > 0) {
+                const intersectPoint = intersects[0].point;
+                intersectPoint.y = cameraHeight;
+                moveToPosition(intersectPoint); // Движение к точке пересечения
+            } else {
+                console.log('Нет пересечений');
+            }
+        }
+
 
 
         function moveToPosition(targetPosition) {
-          
+
             var duration = 1000; // Продолжительность анимации
             var startPosition = camera.position.clone(); // Начальная позиция камеры
             var startTime = performance.now(); // Время старта
@@ -498,103 +478,103 @@ scene.add(rayLine);
 
             animateMovement();
         }
-       
 
-       function init() {
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-            'flat_1C1.glb', // Путь к вашему файлу
-            function (gltf) {
-                // Добавляем загруженную модель в сцену
-                scene.add(gltf.scene);
-                console.log('Модель успешно загружена:', gltf);
-                countTriangles(scene);
-            },
-            undefined, // Опциональный колбэк прогресса
-            function (error) {
-                console.error('Ошибка при загрузке модели:', error);
-            }
-        );
-   /* loader.load(
-        'flat_1C1.glb',
-        function (gltf) {
-            const sceneData = gltf.scene;
 
-            sceneData.traverse(async function (child) {
-                try {
-                    if (child.isMesh) {
-                        console.log(`Mesh: ${child.name}`);
-                        console.log(`Mesh position:`, child.position);
-                        const lod = new THREE.LOD();
-
-                        // Загружаем low-poly модель
-                        const lowModel = await loadLowPolyModel(loader, 'flat_1C1_low.glb', child.name);
-
-                        if (lowModel) {
-                            lowModel.updateMatrixWorld(true); // Обновляем мировую матрицу для low-poly модели
-                            lod.addLevel(lowModel, 5); // Устанавливаем расстояние для low-poly
-                            lowModel.material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Красный для low-poly
-
-                            lowModel.position.copy(child.position); // Устанавливаем позицию для low-poly модели
-                        } else {
-                            console.warn(`Low-poly object ${child.name} not found.`);
-                        }
-
-                        const highModel = child.clone();
-                        highModel.updateMatrixWorld(true); // Обновляем мировую матрицу для high-poly модели
-                        lod.addLevel(highModel, 1); // Устанавливаем расстояние для high-poly
-
-                        // Обновляем мировую позицию для LOD
-                        child.updateMatrixWorld();
-                        var worldPosition = new THREE.Vector3();
-                        child.getWorldPosition(worldPosition); // Получаем мировую позицию
-
-                        lod.position.copy(worldPosition); // Устанавливаем позицию LOD в мировые координаты
-
-                        console.log(`worldPosition:`, worldPosition);
-                        console.log(`lod:`, lod.position);
-                        console.log('Parent Position:', child.parent ? child.parent.position : 'No parent');
-
-                        scene.add(lod); // Добавляем LOD в сцену
-
-                        // Слушаем изменения уровня LOD
-                        trackLOD(lod);
-                    }
-                } catch (error) {
-                    console.error(`Error processing node ${child.name}:`, error);
+        function init() {
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                'flat_1C1.glb', // Путь к вашему файлу
+                function (gltf) {
+                    // Добавляем загруженную модель в сцену
+                    scene.add(gltf.scene);
+                    console.log('Модель успешно загружена:', gltf);
+                    countTriangles(scene);
+                },
+                undefined, // Опциональный колбэк прогресса
+                function (error) {
+                    console.error('Ошибка при загрузке модели:', error);
                 }
-            });
-        },
-        undefined,
-        function (error) {
-            console.error('Error loading GLB:', error);
+            );
+            /* loader.load(
+                 'flat_1C1.glb',
+                 function (gltf) {
+                     const sceneData = gltf.scene;
+         
+                     sceneData.traverse(async function (child) {
+                         try {
+                             if (child.isMesh) {
+                                 console.log(`Mesh: ${child.name}`);
+                                 console.log(`Mesh position:`, child.position);
+                                 const lod = new THREE.LOD();
+         
+                                 // Загружаем low-poly модель
+                                 const lowModel = await loadLowPolyModel(loader, 'flat_1C1_low.glb', child.name);
+         
+                                 if (lowModel) {
+                                     lowModel.updateMatrixWorld(true); // Обновляем мировую матрицу для low-poly модели
+                                     lod.addLevel(lowModel, 5); // Устанавливаем расстояние для low-poly
+                                     lowModel.material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Красный для low-poly
+         
+                                     lowModel.position.copy(child.position); // Устанавливаем позицию для low-poly модели
+                                 } else {
+                                     console.warn(`Low-poly object ${child.name} not found.`);
+                                 }
+         
+                                 const highModel = child.clone();
+                                 highModel.updateMatrixWorld(true); // Обновляем мировую матрицу для high-poly модели
+                                 lod.addLevel(highModel, 1); // Устанавливаем расстояние для high-poly
+         
+                                 // Обновляем мировую позицию для LOD
+                                 child.updateMatrixWorld();
+                                 var worldPosition = new THREE.Vector3();
+                                 child.getWorldPosition(worldPosition); // Получаем мировую позицию
+         
+                                 lod.position.copy(worldPosition); // Устанавливаем позицию LOD в мировые координаты
+         
+                                 console.log(`worldPosition:`, worldPosition);
+                                 console.log(`lod:`, lod.position);
+                                 console.log('Parent Position:', child.parent ? child.parent.position : 'No parent');
+         
+                                 scene.add(lod); // Добавляем LOD в сцену
+         
+                                 // Слушаем изменения уровня LOD
+                                 trackLOD(lod);
+                             }
+                         } catch (error) {
+                             console.error(`Error processing node ${child.name}:`, error);
+                         }
+                     });
+                 },
+                 undefined,
+                 function (error) {
+                     console.error('Error loading GLB:', error);
+                 }
+             );*/
         }
-    );*/
-}
 
 
         // Функция для загрузки low-poly модели
-       /* function loadLowPolyModel(loader, url, name) {
-            return new Promise((resolve, reject) => {
-                loader.load(
-                    url,
-                    function (gltf) {
-                        const model = gltf.scene.getObjectByName(name);
-                        if (model) {
-                            model.updateMatrixWorld(true); // Обновляем мировую матрицу перед возвратом модели
-                            resolve(model);
-                        } else {
-                            reject(new Error(`Model ${name} not found in ${url}`));
-                        }
-                    },
-                    undefined,
-                    function (error) {
-                        console.error(`Error loading ${url}:`, error);
-                        reject(error);
-                    }
-                );
-            });
-        }*/
+        /* function loadLowPolyModel(loader, url, name) {
+             return new Promise((resolve, reject) => {
+                 loader.load(
+                     url,
+                     function (gltf) {
+                         const model = gltf.scene.getObjectByName(name);
+                         if (model) {
+                             model.updateMatrixWorld(true); // Обновляем мировую матрицу перед возвратом модели
+                             resolve(model);
+                         } else {
+                             reject(new Error(`Model ${name} not found in ${url}`));
+                         }
+                     },
+                     undefined,
+                     function (error) {
+                         console.error(`Error loading ${url}:`, error);
+                         reject(error);
+                     }
+                 );
+             });
+         }*/
 
 
 
@@ -603,8 +583,8 @@ scene.add(rayLine);
             let totalTriangles = 0;
 
             scene.traverse((object) => {
-                 console.log(object.name);
-                 console.log(object.type);
+                console.log(object.name);
+                console.log(object.type);
                 if (object.isMesh) { // Проверяем, что объект является мешем
                     const geometry = object.geometry;
 
@@ -752,24 +732,24 @@ scene.add(rayLine);
         // Создание Raycaster для обнаружения столкновений
 
         const collisionDistance = 0.5; // Минимальное расстояние до объекта
-const rayHeightSteps = 5; // Количество проверок по высоте
-const rayHeightInterval = 0.2; // Интервал между лучами по высоте
+        const rayHeightSteps = 5; // Количество проверок по высоте
+        const rayHeightInterval = 0.2; // Интервал между лучами по высоте
 
-function checkCollisions(direction) {
-    for (let i = 0; i < rayHeightSteps; i++) {
-        // Смещаем положение луча вверх на определенную высоту
-        const rayOrigin = camera.position.clone();
-        rayOrigin.y -= i * rayHeightInterval;
+        function checkCollisions(direction) {
+            for (let i = 0; i < rayHeightSteps; i++) {
+                // Смещаем положение луча вверх на определенную высоту
+                const rayOrigin = camera.position.clone();
+                rayOrigin.y -= i * rayHeightInterval;
 
-        raycaster.set(rayOrigin, direction.normalize());
-        const intersects = raycaster.intersectObjects(scene.children, true);
+                raycaster.set(rayOrigin, direction.normalize());
+                const intersects = raycaster.intersectObjects(scene.children, true);
 
-        if (intersects.length > 0 && intersects[0].distance < collisionDistance) {
-            return true; // Обнаружено столкновение
+                if (intersects.length > 0 && intersects[0].distance < collisionDistance) {
+                    return true; // Обнаружено столкновение
+                }
+            }
+            return false; // Столкновений нет
         }
-    }
-    return false; // Столкновений нет
-}
 
         // Обновление позиции камеры
         function updateCameraPosition() {
@@ -824,8 +804,8 @@ function checkCollisions(direction) {
         window.addEventListener('resize', function () {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
-             renderer.setPixelRatio(1);
-           // var renderWidth = container.clientWidth ;
+            renderer.setPixelRatio(1);
+            // var renderWidth = container.clientWidth ;
             //var renderHeight = container.clientHeight;
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.domElement.style.width = '100%';
@@ -851,7 +831,7 @@ function checkCollisions(direction) {
 
         fovSlider.addEventListener('input', updateFOV);
 
-        
+
 
 
 
