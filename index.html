@@ -103,8 +103,8 @@
         console.log('Текущая ширина рендера:', size.width);
         console.log('Текущая высота рендера:', size.height);
 
-        //.shadowMap.enabled = true; // Включаем карту теней
-        //renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)
+        //renderer.shadowMap.enabled = true; // Включаем карту теней
+       // renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)
         // Установите начальное значение экспозиции
         renderer.toneMapping = THREE.ReinhardToneMapping;
         renderer.toneMappingExposure = parseFloat(exposureSlider.value);
@@ -117,15 +117,15 @@
         pmremGenerator.compileEquirectangularShader();
         const environment = new THREE.RoomEnvironment();
         var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
-        scene.environment = defaultEnvMap;       
+        scene.environment = defaultEnvMap;      
 
         var stats = new Stats();
         stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
         document.body.appendChild(stats.dom);
 
         // Добавляем окружающий свет
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-        scene.add(ambientLight);     
+      /*  const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+        scene.add(ambientLight); */   
 
        
 
