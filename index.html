@@ -88,7 +88,7 @@
         var camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 200);
 
 
-        var renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
+        var renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true/*, alpha: true*/ });
         renderer.setSize(renderWidth, renderHeight);
         renderer.setPixelRatio(1);
 
