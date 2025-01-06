@@ -415,7 +415,8 @@
             mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
 
             // Установка луча
-            
+           // camera.position.y = 0.3;
+
             raycaster.setFromCamera(mouse, camera);
 
             
@@ -438,7 +439,7 @@
             }
 
             // Обновление геометрии линии
-            // rayLineGeometry.setFromPoints([rayStart, rayEnd]);
+             //rayLineGeometry.setFromPoints([rayStart, rayEnd]);
 
             if (intersects.length > 0) {
                 const intersectPoint = intersects[0].point;
