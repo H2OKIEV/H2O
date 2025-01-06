@@ -396,50 +396,54 @@
             }
         }
 
-        // Визуализация луча (теперь максимально эффективно)
-        const rayPositions = new Float32Array(6); // 2 точки * 3 координаты
-        const rayGeometry = new THREE.BufferGeometry();
-        rayGeometry.setAttribute('position', new THREE.BufferAttribute(rayPositions, 3));
-        rayGeometry.setDrawRange(0, 2);
-        const rayLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
-        const rayLine = new THREE.Line(rayGeometry, rayLineMaterial);
+        // Переменные для визуализации raycast
+        let rayLine;
+        const rayLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Красный цвет для линии
+        const rayLineGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, 0, 0),  // Начальная точка
+            new THREE.Vector3(0, 0, 0)   // Конечная точка
+        ]);
+
+        // Создаем линию и добавляем ее в сцену
+        rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
         scene.add(rayLine);
 
 
-
-        const cameraOffset = new THREE.Vector3(0, -1.2, 0);
         function onClick(event) {
-            // Координаты мыши
+            // Вычисление координат мыши
             mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
             mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
 
-            const raycastOrigin = camera.position.clone().add(cameraOffset);
+            // Установка луча
+            
+            raycaster.setFromCamera(mouse, camera);
 
-            const mouseNDC = new THREE.Vector3(mouse.x, mouse.y, 1); // Z = 1 - ВАЖНО!
-            const mouseWorld = mouseNDC.unproject(camera);
+            
+            // Обновление линии для визуализации
+            const rayStart = raycaster.ray.origin.clone(); // Начало луча (камера)
+            let rayEnd; // Конец луча
 
-            const raycastDirection = mouseWorld.clone().sub(raycastOrigin).normalize();
+            // Проверка пересечений
+            const intersects = raycaster.intersectObjects(
+                scene.children.filter(obj => obj !== circle), // Исключаем объект, если нужно
+                true
+            );
 
-            raycaster.set(raycastOrigin, raycastDirection);
+            if (intersects.length > 0) {
+                // Точка пересечения
+                rayEnd = intersects[0].point.clone();
+            } else {
+                // Если пересечений нет, линия до максимальной длины
+                rayEnd = rayStart.clone().add(raycaster.ray.direction.clone().multiplyScalar(100));
+            }
 
-            // *** ПРАВИЛЬНОЕ обновление линии ***
-            rayPositions[0] = raycastOrigin.x;
-            rayPositions[1] = raycastOrigin.y;
-            rayPositions[2] = raycastOrigin.z;
-            rayPositions[3] = mouseWorld.x;
-            rayPositions[4] = mouseWorld.y;
-            rayPositions[5] = mouseWorld.z;
-            rayLineGeometry.attributes.position.needsUpdate = true;
-            // **********************************
-
-
-            const intersects = raycaster.intersectObjects(scene.children.filter(obj => obj !== circle), true);
+            // Обновление геометрии линии
+            // rayLineGeometry.setFromPoints([rayStart, rayEnd]);
 
             if (intersects.length > 0) {
                 const intersectPoint = intersects[0].point;
-                console.log('Точка пересечения:', intersectPoint);
                 intersectPoint.y = cameraHeight;
-                moveToPosition(intersectPoint);
+                moveToPosition(intersectPoint); // Движение к точке пересечения
             } else {
                 console.log('Нет пересечений');
             }
