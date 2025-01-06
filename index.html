@@ -110,7 +110,7 @@
         renderer.toneMappingExposure = parseFloat(exposureSlider.value);
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.6;
+        renderer.toneMappingExposure = 0.2;
         renderer.outputEncoding = THREE.sRGBEncoding;
 
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -124,7 +124,7 @@
         document.body.appendChild(stats.dom);
 
         // Добавляем окружающий свет
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambientLight);     
 
        
@@ -416,25 +416,57 @@
             }
         }
 
-        function onClick(event) {
-            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+// Переменные для визуализации raycast
+let rayLine;
+const rayLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Красный цвет для линии
+const rayLineGeometry = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, 0, 0),  // Начальная точка
+    new THREE.Vector3(0, 0, 0)   // Конечная точка
+]);
 
-            raycaster.setFromCamera(mouse, camera);
-            var intersects = raycaster.intersectObjects(scene.children.filter(obj => obj !== circle), true);
+// Создаем линию и добавляем ее в сцену
+rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
+scene.add(rayLine);
 
-            if (intersects.length > 0) {
-                var intersectPoint = intersects[0].point;
-                intersectPoint.y = cameraHeight;
-                let closestIndex = -1;
-                let closestDistance = Infinity;
-               //console.log('moveToPosition:', intersectPoint);
-                moveToPosition(intersectPoint);
-            }
-            else {
-                console.log('нет пересечений:');
-            }
-        }       
+
+       function onClick(event) {
+    // Вычисление координат мыши
+    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+    // Установка луча
+    raycaster.setFromCamera(mouse, camera);
+
+    // Обновление линии для визуализации
+    const rayStart = raycaster.ray.origin.clone(); // Начало луча (камера)
+    let rayEnd; // Конец луча
+
+    // Проверка пересечений
+    const intersects = raycaster.intersectObjects(
+        scene.children.filter(obj => obj !== circle), // Исключаем объект, если нужно
+        true
+    );
+
+    if (intersects.length > 0) {
+        // Точка пересечения
+        rayEnd = intersects[0].point.clone(); 
+    } else {
+        // Если пересечений нет, линия до максимальной длины
+        rayEnd = rayStart.clone().add(raycaster.ray.direction.clone().multiplyScalar(100));
+    }
+
+    // Обновление геометрии линии
+    rayLineGeometry.setFromPoints([rayStart, rayEnd]);
+
+    if (intersects.length > 0) {
+        const intersectPoint = intersects[0].point;
+        intersectPoint.y = cameraHeight;
+        moveToPosition(intersectPoint); // Движение к точке пересечения
+    } else {
+        console.log('Нет пересечений');
+    }
+}
+      
 
 
         function moveToPosition(targetPosition) {
@@ -442,7 +474,7 @@
             var duration = 1000; // Продолжительность анимации
             var startPosition = camera.position.clone(); // Начальная позиция камеры
             var startTime = performance.now(); // Время старта
-            var stopDistance = 0.2; // Расстояние, на котором остановится камера
+            var stopDistance = 0.5; // Расстояние, на котором остановится камера
 
             function animateMovement() {
                 var elapsedTime = performance.now() - startTime; // Время, прошедшее с начала
@@ -571,8 +603,8 @@
             let totalTriangles = 0;
 
             scene.traverse((object) => {
-                // console.log(object.name);
-                // console.log(object.type);
+                 console.log(object.name);
+                 console.log(object.type);
                 if (object.isMesh) { // Проверяем, что объект является мешем
                     const geometry = object.geometry;
 
