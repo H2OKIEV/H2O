@@ -110,7 +110,7 @@
         renderer.toneMappingExposure = parseFloat(exposureSlider.value);
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.2;
+       // renderer.toneMappingExposure = 0.9;
         renderer.outputEncoding = THREE.sRGBEncoding;
 
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
