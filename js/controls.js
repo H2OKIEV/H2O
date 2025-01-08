@@ -221,10 +221,10 @@ function findSafePosition(targetPosition, searchRadius = 0.5) {
         }
        
 
-        const pointMesh = new THREE.Mesh(sphereGeometry, materialToUse);
+       /* const pointMesh = new THREE.Mesh(sphereGeometry, materialToUse);
         pointMesh.position.copy(checkPosition);
         scene.add(pointMesh); // Добавляем точку в сцену
-        calculatedPoints.push(pointMesh); // Сохраняем ссылку на точку
+        calculatedPoints.push(pointMesh); // Сохраняем ссылку на точку*/
     }
 
 
