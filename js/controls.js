@@ -102,13 +102,13 @@ const personHeight = 1;
 const personRadius = 0.2; // Примерный радиус для проверки столкновений
 
 // Функция для проверки столкновения с BoxHelper
-function isColliding(position, log = false) {   
+function isColliding(position, log = false) {
 
     for (const child of scene.children) {
-        if(child.name === "boxHelper_outer_walls") 
-            continue;        
-        if(child.name === "boxHelper_Body45") 
-            continue;       
+        if (child.name === "boxHelper_outer_walls")
+            continue;
+        if (child.name === "boxHelper_Body45")
+            continue;
         if (child instanceof THREE.BoxHelper) {
             const box = new THREE.Box3().setFromObject(child.object);
             const personBox = new THREE.Box3(
@@ -117,10 +117,10 @@ function isColliding(position, log = false) {
             );
             if (box.intersectsBox(personBox)) {
                 if (log) {
-                    console.log("Столкновение ",child);
-                    console.log("Столкновение ",personBox);
+                    console.log("Столкновение ", child);
+                    console.log("Столкновение ", personBox);
                 }
-              
+
                 return true; // Столкновение есть
             }
         }
@@ -129,7 +129,7 @@ function isColliding(position, log = false) {
 }
 
 // Функция для поиска безопасной точки рядом с целевой
-function findSafePosition(targetPosition, searchRadius = 1) { // Добавил параметр searchRadius
+function findSafePosition(targetPosition, searchRadius = 1) {
     let wallAndCeilingsBox = null;
 
     for (const child of scene.children) {
@@ -147,35 +147,61 @@ function findSafePosition(targetPosition, searchRadius = 1) { // Добавил 
     let closestSafePosition = null;
     let closestDistance = Infinity;
 
-    const numChecks = 32; // Увеличил количество проверок для большей точности
+    const numChecks = 32;
+    const raycaster = new THREE.Raycaster(); // Создаем Raycaster один раз
 
     for (let i = 0; i < numChecks; i++) {
         const angle = (i / numChecks) * Math.PI * 2;
         const checkPosition = new THREE.Vector3(
             targetPosition.x + searchRadius * Math.cos(angle),
-            targetPosition.y,
+            cameraHeight, // Устанавливаем корректную высоту
             targetPosition.z + searchRadius * Math.sin(angle)
         );
-        checkPosition.y = cameraHeight;
 
-        if(checkPosition.distanceTo(camera.position) < 0.5) 
+        if (checkPosition.distanceTo(camera.position) < 0.5)
             continue;
-        // Проверяем, находится ли точка ВНУТРИ wallAndCeilingsBox
+
         if (wallAndCeilingsBox.containsPoint(checkPosition)) {
             if (!isColliding(checkPosition)) {
-                // Точка безопасна и находится внутри Box3. Проверяем, ближе ли она, чем предыдущая найденная.
-                const distance = targetPosition.distanceTo(checkPosition);
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestSafePosition = checkPosition;
+
+                // Проверка видимости с помощью Raycasting
+                const direction = checkPosition.clone().sub(camera.position).normalize();
+                raycaster.set(camera.position, direction);
+
+                var intersects = raycaster.intersectObjects(
+                    scene.children.filter(obj => !(obj instanceof THREE.BoxHelper) && obj !== circle && obj.name !== "Body45"),
+                    true
+                );
+
+                // Исключаем из проверки объекты, которые не должны блокировать луч
+               /* const objectsToIntersect = scene.children.filter(child =>
+                    child instanceof THREE.Mesh && // Проверяем только меши
+                    child.name !== "player" && // Исключаем самого игрока
+                    child.name !== "boxHelper_outer_walls" &&
+                    child.name !== "boxHelper_Body45"
+                );
+
+                const intersects = raycaster.intersectObjects(objectsToIntersect);*/
+
+                if (intersects.length === 0 || intersects[0].distance > checkPosition.distanceTo(camera.position)) {
+                    // Точка видна, проверяем расстояние
+                    
+                    const distance = targetPosition.distanceTo(checkPosition);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestSafePosition = checkPosition;
+                    }
+                } else {
+                     console.log("Точка не видна из-за:", intersects[0].object);
                 }
             }
         }
     }
+
     if (closestSafePosition) {
-        console.log("Найдена ближайшая безопасная позиция:", closestSafePosition);
+        console.log("Найдена ближайшая безопасная и видимая позиция:", closestSafePosition);
     } else {
-        console.log("В радиусе", searchRadius, "не найдена безопасная позиция внутри boxHelper_wall_and_ceillings");
+        console.log("В радиусе", searchRadius, "не найдена безопасная и видимая позиция внутри boxHelper_wall_and_ceillings");
     }
     return closestSafePosition;
 }
@@ -188,7 +214,7 @@ function onClick(event) {
     // Установка луча
     // camera.position.y = 0.3;
 
-   
+
     raycaster.setFromCamera(mouse, camera);
     console.log(mouse.x, mouse.y);
 
@@ -218,8 +244,20 @@ function onClick(event) {
 
     if (intersects.length > 0) {
         let intersectPoint = intersects[0].point.clone();
-        intersectPoint.y = cameraHeight + personHeight/2; // Учитываем высоту "человека" и ставим центр капсулы
+        var clickPoint = intersects[0].point.clone();
 
+        var startPosition = camera.position.clone();
+        var stopDistance = 0.5;
+
+        if (startPosition.distanceTo(intersectPoint) < stopDistance + 0.5) {
+            console.log("Камера уже достаточно близко. Запускаем анимацию поворота.");
+
+            animateRotation(clickPoint); // Анимация поворота камеры
+            return; // Выход из функции, если движение не требуется
+        }
+      
+
+        intersectPoint.y = cameraHeight + personHeight / 2; // Учитываем высоту "человека" и ставим центр капсулы
         if (isColliding(intersectPoint, true)) {
             console.log("Целевая точка внутри BoxHelper. Ищем безопасную позицию.");
             const safePosition = findSafePosition(intersectPoint);
@@ -228,20 +266,14 @@ function onClick(event) {
                 moveToPosition(safePosition);
             } else {
                 console.log("Безопасная позиция не найдена.");
+                // intersectPoint.y = cameraHeight;
                 // Обработка ситуации, когда безопасная точка не найдена
-                animateRotation(intersectPoint); // Анимация поворота камеры
+                animateRotation(clickPoint); // Анимация поворота камеры
                 return; // Выход из функции, если движение не требуется 
             }
         } else {
-            var startPosition = camera.position.clone();
-            var stopDistance = 0.5;
 
-            if (startPosition.distanceTo(intersectPoint) < stopDistance + 0.5) {
-                console.log("Камера уже достаточно близко. Запускаем анимацию поворота.");
 
-                animateRotation(intersectPoint); // Анимация поворота камеры
-                return; // Выход из функции, если движение не требуется
-            }
 
             moveToPosition(intersectPoint);
         }

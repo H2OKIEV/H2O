@@ -246,6 +246,7 @@
 
                     // Обрабатываем материалы модели
                     gltf.scene.traverse((node) => {
+                        console.log("Объект: ", node); // Имя объекта
                         if (node.isMesh && node.material) {
                             const material = node.material;
 
@@ -276,7 +277,7 @@
                                 console.log('Интенсивность эмиссии:', material.emissiveIntensity, node.name);
 
                                 if (node.material) { // Проверяем, есть ли материал у объекта
-                                    console.log("Объект: ", node.name); // Имя объекта
+                                  
                                     console.log("Материал: ", node.material.name); // Название материала
                                 }
                                 // Логируем цвет эмиссии
