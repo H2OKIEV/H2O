@@ -121,9 +121,9 @@
         // Установите начальное значение экспозиции
         // renderer.toneMapping = THREE.ReinhardToneMapping;
 
-       // renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.8;
+        //renderer.toneMappingExposure = 0.8;
         //renderer.outputEncoding = THREE.sRGBEncoding;
 
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -278,10 +278,10 @@
                             const material = node.material;
                             node.updateMatrixWorld(true);
 
-                           /* const geometry = node.geometry;
-                            if (geometry.attributes.uv1) {
-                                console.log(`Объект ${node.name} содержит дополнительный UV-набор (uv1).`);
-                            }*/
+                            /* const geometry = node.geometry;
+                             if (geometry.attributes.uv1) {
+                                 console.log(`Объект ${node.name} содержит дополнительный UV-набор (uv1).`);
+                             }*/
 
                             // Вычисляем границы объекта в мировых координатах
                             const boundingBox = new THREE.Box3().setFromObject(node);
@@ -873,7 +873,7 @@
             animateMovement();
         }
 
-       
+
         function animateRotation(targetPosition) {
             if (isAnimating) return; // Чтобы предотвратить повторный запуск анимации, если она уже идет
 
