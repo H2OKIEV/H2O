@@ -61,7 +61,8 @@
     <script src="js/controlstouch.js"></script>
     <script src="js/controlskeyboard.js"></script>
     <script src="js/debug.js"></script>
-    <script>
+    
+    <script >
 
         var scene = new THREE.Scene();
 
@@ -141,18 +142,18 @@
             */
 
         // Создаем материал для круга
-        const circleMaterial1 = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // 
-
-        // Создаем геометрию круга
-        const circleGeometry1 = new THREE.CircleGeometry(0.2, 32); // Радиус 0.1, 32 сегмента
-
-        // Создаем меш круга
-        const circleMesh = new THREE.Mesh(circleGeometry1, circleMaterial1);
-        circleMesh.position.set(camera.position.x, 0.1, camera.position.z); // Устанавливаем позицию на месте камеры
-        circleMesh.rotation.x = -Math.PI / 2; // Поворачиваем круг, чтобы он был горизонтально
-        circleMesh.layers.set(1);
+        /* const circleMaterial1 = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // 
+ 
+         // Создаем геометрию круга
+         const circleGeometry1 = new THREE.CircleGeometry(0.2, 32); // Радиус 0.1, 32 сегмента
+ 
+         // Создаем меш круга
+         const circleMesh = new THREE.Mesh(circleGeometry1, circleMaterial1);
+         circleMesh.position.set(camera.position.x, 0.1, camera.position.z); // Устанавливаем позицию на месте камеры
+         circleMesh.rotation.x = -Math.PI / 2; // Поворачиваем круг, чтобы он был горизонтально
+         circleMesh.layers.set(1);*/
         // Добавляем круг в сцену
-        scene.add(circleMesh);
+        // scene.add(circleMesh);
         camera.layers.enableAll();
 
         // Функция для обновления положения маркера на карте
@@ -237,8 +238,7 @@
         function init() {
 
             const loader = new THREE.GLTFLoader();
-            loader.load(
-                'flat_1C1.glb', // Путь к вашему файлу
+            loader.load('flat_1C1.glb', // Путь к вашему файлу
                 function (gltf) {
                     // Добавляем загруженную модель в сцену
                     scene.add(gltf.scene);
@@ -246,10 +246,16 @@
 
                     // Обрабатываем материалы модели
                     gltf.scene.traverse((node) => {
-                        console.log("Объект: ", node); // Имя объекта
+                        // console.log("Объект: ", node); // Имя объекта
+
                         if (node.isMesh && node.material) {
                             const material = node.material;
                             node.updateMatrixWorld(true);
+
+                            const geometry = node.geometry;
+                            if (geometry.attributes.uv1) {
+                                console.log(`Объект ${node.name} содержит дополнительный UV-набор (uv1).`);
+                            }
 
                             // Вычисляем границы объекта в мировых координатах
                             const boundingBox = new THREE.Box3().setFromObject(node);
@@ -266,9 +272,9 @@
                             // Добавляем BoxHelper в сцену
                             scene.add(boxHelper);
 
-                            console.log("Меш:", node);
-                            console.log("BoxHelper:", boxHelper);
-                            console.log("Границы в мировых координатах:", boundingBox.min, boundingBox.max);
+                            // console.log("Меш:", node);
+                            // console.log("BoxHelper:", boxHelper);
+                            // console.log("Границы в мировых координатах:", boundingBox.min, boundingBox.max);
 
                             // Проверяем, есть ли у материала карта эмиссии
                             /*  if (material.map) console.log('Base Color Map:', material.map);
@@ -306,7 +312,7 @@
                       }*/
 
                     // Настроим эффект композиции
-                    setupPostProcessing();
+                    // setupPostProcessing();
 
                     countTriangles(scene);
                     //visualizeBoundingBoxes(scene);
