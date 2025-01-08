@@ -99,7 +99,7 @@ const MOVE_THRESHOLD = 5; // Пороговое значение для пере
 
 // Параметры "человека"
 const personHeight = 1;
-const personRadius = 0.1; // Примерный радиус для проверки столкновений
+const personRadius = 0.2; // Примерный радиус для проверки столкновений
 
 // Функция для проверки столкновения с BoxHelper
 function isColliding(position, log = false) {   
@@ -229,6 +229,8 @@ function onClick(event) {
             } else {
                 console.log("Безопасная позиция не найдена.");
                 // Обработка ситуации, когда безопасная точка не найдена
+                animateRotation(intersectPoint); // Анимация поворота камеры
+                return; // Выход из функции, если движение не требуется 
             }
         } else {
             var startPosition = camera.position.clone();

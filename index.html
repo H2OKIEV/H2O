@@ -249,6 +249,13 @@
                         if (node.isMesh && node.material) {
                             const material = node.material;
 
+                            
+                            const boxHelper = new THREE.BoxHelper(node, 0x0000ff);
+                            boxHelper.name = "boxHelper_" + node.name; // Добавляем имя для упрощения поиска
+                            scene.add(boxHelper);
+                            console.log(node);
+                            console.log(boxHelper);
+
                             // Проверяем, есть ли у материала карта эмиссии
                             /*  if (material.map) console.log('Base Color Map:', material.map);
                               if (material.normalMap) console.log('Normal Map:', material.normalMap);
@@ -288,7 +295,7 @@
                     setupPostProcessing();
 
                     countTriangles(scene);
-                    visualizeBoundingBoxes(scene);
+                    //visualizeBoundingBoxes(scene);
                     console.log("Все дочерние элементы сцены после :", scene.children);
                 },
                 undefined, // Опциональный колбэк прогресса
@@ -302,12 +309,14 @@
         function visualizeBoundingBoxes(scene) {
             scene.traverse((object) => {
                 // Проверяем, является ли объект мешем
-               
+
                 if (object.isMesh) {
                     // Исключаем конкретный объект, например, "Circle001"
                     if (object.name == "Circle001") return;
-                   
+
                     // Создаем BoxHelper для каждого меша
+                  
+
                     const boxHelper = new THREE.BoxHelper(object, 0x0000ff);
                     boxHelper.name = "boxHelper_" + object.name; // Добавляем имя для упрощения поиска
                     scene.add(boxHelper);
@@ -316,25 +325,25 @@
                 }
 
                 // Если объект является группой, рекурсивно проходим по его дочерним объектам
-              /*  if (object.isGroup) {
-                    object.traverse((child) => {
-                        if (child.isMesh && child.name !== "Circle001") {
-                            const boxHelper = new THREE.BoxHelper(child, 0x0000ff);
-                            boxHelper.name = "boxHelper_" + child.name;
-                            scene.add(boxHelper);
-                        }
-                    });
-                }
-
-                if (object instanceof THREE.Object3D) {
-                    object.traverse((child) => {
-                        if (child.isMesh && child.name !== "Circle001") {
-                            const boxHelper = new THREE.BoxHelper(child, 0x0000ff);
-                            boxHelper.name = "boxHelper_" + child.name;
-                            scene.add(boxHelper);
-                        }
-                    });
-                }*/
+                /*  if (object.isGroup) {
+                      object.traverse((child) => {
+                          if (child.isMesh && child.name !== "Circle001") {
+                              const boxHelper = new THREE.BoxHelper(child, 0x0000ff);
+                              boxHelper.name = "boxHelper_" + child.name;
+                              scene.add(boxHelper);
+                          }
+                      });
+                  }
+  
+                  if (object instanceof THREE.Object3D) {
+                      object.traverse((child) => {
+                          if (child.isMesh && child.name !== "Circle001") {
+                              const boxHelper = new THREE.BoxHelper(child, 0x0000ff);
+                              boxHelper.name = "boxHelper_" + child.name;
+                              scene.add(boxHelper);
+                          }
+                      });
+                  }*/
 
             });
 
