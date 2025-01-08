@@ -221,10 +221,10 @@
             new THREE.Vector3(0, 0, 0)   // Конечная точка
         ]);
 
-        const clickMarkerGeometry = new THREE.SphereGeometry(0.1, 32, 32); // Сфера диаметром 0.1
-        const clickMarkerMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Синий цвет
-        let clickMarker = new THREE.Mesh(clickMarkerGeometry, clickMarkerMaterial);
-        scene.add(clickMarker); // Добавляем в сцену
+        /* const clickMarkerGeometry = new THREE.SphereGeometry(0.1, 32, 32); // Сфера диаметром 0.1
+         const clickMarkerMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Синий цвет
+         let clickMarker = new THREE.Mesh(clickMarkerGeometry, clickMarkerMaterial);
+         scene.add(clickMarker); // Добавляем в сцену*/
 
         // Создаем линию и добавляем ее в сцену
         rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
@@ -249,13 +249,26 @@
                         console.log("Объект: ", node); // Имя объекта
                         if (node.isMesh && node.material) {
                             const material = node.material;
+                            node.updateMatrixWorld(true);
 
-                            
+                            // Вычисляем границы объекта в мировых координатах
+                            const boundingBox = new THREE.Box3().setFromObject(node);
+
+                            // Создаем BoxHelper и корректируем его по мировым координатам
                             const boxHelper = new THREE.BoxHelper(node, 0x0000ff);
-                            boxHelper.name = "boxHelper_" + node.name; // Добавляем имя для упрощения поиска
+                            boxHelper.name = "boxHelper_" + node.name;
+
+                            // Применяем матрицу трансформации объекта
+                            boxHelper.position.copy(node.getWorldPosition(new THREE.Vector3())); // Переносим BoxHelper в мировую позицию
+                            boxHelper.scale.copy(node.getWorldScale(new THREE.Vector3())); // Учитываем масштаб объекта
+                            boxHelper.rotation.setFromRotationMatrix(node.matrixWorld); // Учитываем вращение объекта
+
+                            // Добавляем BoxHelper в сцену
                             scene.add(boxHelper);
-                            console.log(node);
-                            console.log(boxHelper);
+
+                            console.log("Меш:", node);
+                            console.log("BoxHelper:", boxHelper);
+                            console.log("Границы в мировых координатах:", boundingBox.min, boundingBox.max);
 
                             // Проверяем, есть ли у материала карта эмиссии
                             /*  if (material.map) console.log('Base Color Map:', material.map);
@@ -277,7 +290,7 @@
                                 console.log('Интенсивность эмиссии:', material.emissiveIntensity, node.name);
 
                                 if (node.material) { // Проверяем, есть ли материал у объекта
-                                  
+
                                     console.log("Материал: ", node.material.name); // Название материала
                                 }
                                 // Логируем цвет эмиссии
@@ -316,7 +329,7 @@
                     if (object.name == "Circle001") return;
 
                     // Создаем BoxHelper для каждого меша
-                  
+
 
                     const boxHelper = new THREE.BoxHelper(object, 0x0000ff);
                     boxHelper.name = "boxHelper_" + object.name; // Добавляем имя для упрощения поиска

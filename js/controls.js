@@ -109,6 +109,8 @@ function isColliding(position, log = false) {
             continue;
         if (child.name === "boxHelper_Body45")
             continue;
+        if (child.name === "boxHelper_Body45_2")
+            continue;
         if (child instanceof THREE.BoxHelper) {
             const box = new THREE.Box3().setFromObject(child.object);
             const personBox = new THREE.Box3(
@@ -128,8 +130,21 @@ function isColliding(position, log = false) {
     return false; // Столкновения нет
 }
 
+
+let calculatedPoints = [];
+
+// Функция для очистки всех предыдущих точек
+function clearCalculatedPoints() {
+    calculatedPoints.forEach(point => {
+        scene.remove(point); // Удаляем точку из сцены
+        point.geometry.dispose(); // Освобождаем память геометрии
+        point.material.dispose(); // Освобождаем память материала
+    });
+    calculatedPoints = []; // Очищаем массив
+}
+
 // Функция для поиска безопасной точки рядом с целевой
-function findSafePosition(targetPosition, searchRadius = 1) {
+function findSafePosition(targetPosition, searchRadius = 0.5) {
     let wallAndCeilingsBox = null;
 
     for (const child of scene.children) {
@@ -150,6 +165,14 @@ function findSafePosition(targetPosition, searchRadius = 1) {
     const numChecks = 32;
     const raycaster = new THREE.Raycaster(); // Создаем Raycaster один раз
 
+    // Предварительная подготовка: материал и геометрия для точек
+    const visibleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Зеленый - для видимых точек
+    const blockedMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Красный - для невидимых точек
+    const blocked2Material = new THREE.MeshBasicMaterial({ color: 0xfff000 }); // Красный - для невидимых точек
+    const sphereGeometry = new THREE.SphereGeometry(0.05, 16, 16); // Радиус 0.1, сегменты 16
+
+    clearCalculatedPoints(); // Очистка перед новым расчетом
+
     for (let i = 0; i < numChecks; i++) {
         const angle = (i / numChecks) * Math.PI * 2;
         const checkPosition = new THREE.Vector3(
@@ -158,45 +181,52 @@ function findSafePosition(targetPosition, searchRadius = 1) {
             targetPosition.z + searchRadius * Math.sin(angle)
         );
 
-        if (checkPosition.distanceTo(camera.position) < 0.5)
-            continue;
+        if (checkPosition.distanceTo(camera.position) < 0.5) continue;
+        let materialToUse;
 
         if (wallAndCeilingsBox.containsPoint(checkPosition)) {
-            if (!isColliding(checkPosition)) {
-
+            if (!isColliding(checkPosition, true)) {
                 // Проверка видимости с помощью Raycasting
                 const direction = checkPosition.clone().sub(camera.position).normalize();
                 raycaster.set(camera.position, direction);
 
                 var intersects = raycaster.intersectObjects(
-                    scene.children.filter(obj => !(obj instanceof THREE.BoxHelper) && obj !== circle && obj.name !== "Body45"),
+                    scene.children.filter(obj => !(obj instanceof THREE.BoxHelper) && obj !== circle && obj !== scene.getObjectByName("Body45")&& obj !== scene.getObjectByName("Body45_2")),
                     true
                 );
 
-                // Исключаем из проверки объекты, которые не должны блокировать луч
-               /* const objectsToIntersect = scene.children.filter(child =>
-                    child instanceof THREE.Mesh && // Проверяем только меши
-                    child.name !== "player" && // Исключаем самого игрока
-                    child.name !== "boxHelper_outer_walls" &&
-                    child.name !== "boxHelper_Body45"
-                );
-
-                const intersects = raycaster.intersectObjects(objectsToIntersect);*/
+                let materialToUse;
 
                 if (intersects.length === 0 || intersects[0].distance > checkPosition.distanceTo(camera.position)) {
-                    // Точка видна, проверяем расстояние
-                    
+                    // Точка видна
+                    materialToUse = visibleMaterial;
                     const distance = targetPosition.distanceTo(checkPosition);
                     if (distance < closestDistance) {
                         closestDistance = distance;
                         closestSafePosition = checkPosition;
                     }
                 } else {
-                     console.log("Точка не видна из-за:", intersects[0].object);
+                    // Точка невидима
+                    materialToUse = blockedMaterial;
+                    console.log("Точка не видна из-за:", intersects[0].object);
                 }
+
+                // Визуализация точки
+               
+            }
+            else
+            {
+                materialToUse = blocked2Material;
             }
         }
+       
+
+        const pointMesh = new THREE.Mesh(sphereGeometry, materialToUse);
+        pointMesh.position.copy(checkPosition);
+        scene.add(pointMesh); // Добавляем точку в сцену
+        calculatedPoints.push(pointMesh); // Сохраняем ссылку на точку
     }
+
 
     if (closestSafePosition) {
         console.log("Найдена ближайшая безопасная и видимая позиция:", closestSafePosition);
@@ -210,9 +240,6 @@ function onClick(event) {
     // Вычисление координат мыши
     mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
     mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-    // Установка луча
-    // camera.position.y = 0.3;
 
 
     raycaster.setFromCamera(mouse, camera);
@@ -232,7 +259,7 @@ function onClick(event) {
     if (intersects.length > 0) {
         // Точка пересечения
         rayEnd = intersects[0].point.clone();
-        clickMarker.position.copy(rayEnd);
+        // clickMarker.position.copy(rayEnd);
     } else {
         // Если пересечений нет, линия до максимальной длины
         rayEnd = rayStart.clone().add(raycaster.ray.direction.clone().multiplyScalar(100));
@@ -240,7 +267,7 @@ function onClick(event) {
     }
 
     // Обновление геометрии линии
-    rayLineGeometry.setFromPoints([rayStart, rayEnd]);
+    // rayLineGeometry.setFromPoints([rayStart, rayEnd]);
 
     if (intersects.length > 0) {
         let intersectPoint = intersects[0].point.clone();
@@ -255,7 +282,7 @@ function onClick(event) {
             animateRotation(clickPoint); // Анимация поворота камеры
             return; // Выход из функции, если движение не требуется
         }
-      
+
 
         intersectPoint.y = cameraHeight + personHeight / 2; // Учитываем высоту "человека" и ставим центр капсулы
         if (isColliding(intersectPoint, true)) {
@@ -264,6 +291,7 @@ function onClick(event) {
             if (safePosition) {
                 console.log("Найдена безопасная позиция:", safePosition);
                 moveToPosition(safePosition);
+                //animateRotation(clickPoint); 
             } else {
                 console.log("Безопасная позиция не найдена.");
                 // intersectPoint.y = cameraHeight;
