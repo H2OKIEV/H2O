@@ -262,7 +262,7 @@
                             boxHelper.position.copy(node.getWorldPosition(new THREE.Vector3())); // Переносим BoxHelper в мировую позицию
                             boxHelper.scale.copy(node.getWorldScale(new THREE.Vector3())); // Учитываем масштаб объекта
                             boxHelper.rotation.setFromRotationMatrix(node.matrixWorld); // Учитываем вращение объекта
-
+                            boxHelper.visible = false;
                             // Добавляем BoxHelper в сцену
                             scene.add(boxHelper);
 
