@@ -42,11 +42,13 @@
             cursor: grabbing;
         }*/
     </style>
+
+  
 </head>
 
 <body>
     <div id="3d-viewer" style="width: 100%; height: 97vh;"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.tsl.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/environments/RoomEnvironment.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/EXRLoader.js"></script>
@@ -56,13 +58,22 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/CopyShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/LuminosityHighPassShader.js"></script> -->
     <script src="js/controls.js"></script>
     <script src="js/controlstouch.js"></script>
     <script src="js/controlskeyboard.js"></script>
     <script src="js/debug.js"></script>
-    
-    <script >
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@<0.172.0>/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@<0.172.0>/examples/jsm/"
+          }
+        }
+      </script>
+
+    <script type="module">
+        import * as THREE from 'three';
 
         var scene = new THREE.Scene();
 
