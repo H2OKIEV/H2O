@@ -84,6 +84,11 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { Reflector } from 'three/addons/objects/Reflector.js';
+        import * as BufferGeometryUtils from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/utils/BufferGeometryUtils.js';
+
+
+
         //import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
         var scene = new THREE.Scene();
@@ -120,11 +125,11 @@
          renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)*/
         // Установите начальное значение экспозиции
         // renderer.toneMapping = THREE.ReinhardToneMapping;
-
-        renderer.outputEncoding = THREE.sRGBEncoding;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.physicallyCorrectLights = true;
+        // renderer.outputEncoding = THREE.sRGBEncoding;
+        // renderer.toneMapping = THREE.ACESFilmicToneMapping;
         //renderer.toneMappingExposure = 0.8;
-        //renderer.outputEncoding = THREE.sRGBEncoding;
+
 
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
         pmremGenerator.compileEquirectangularShader();
@@ -138,8 +143,8 @@
 
 
         // Добавляем окружающий свет
-        /*  const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
-          scene.add(ambientLight); */
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(ambientLight);
 
 
 
@@ -257,31 +262,94 @@
         rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
         scene.add(rayLine);
 
-
-
+        /*  const planeGeometry = new THREE.PlaneGeometry(0.5, 1.5); // Пример размеров
+          const plane = new Reflector(planeGeometry, {
+              clipBias: 0.0003, // Подбирайте значение
+              textureWidth: window.innerWidth * window.devicePixelRatio,
+              textureHeight: window.innerHeight * window.devicePixelRatio,
+              color: new THREE.Color(0x7f7f7f),
+              recursion: 0
+          });
+          plane.rotation.y = Math.PI / 2; // Поворачиваем, если нужно
+          plane.position.set(1, 1.5, 1)
+          scene.add(plane);
+  */
 
         const bloomLayer = new THREE.Layers(); // Для блума
+        function mergeVertices(geometry) {
+            const vertices = geometry.attributes.position.array;
+            const verticesMap = {};
+            const newVertices = [];
+            const newIndices = [];
+
+            let dedupeVertex = (i) => {
+                const vertex = vertices.slice(i, i + 3);
+                const key = JSON.stringify(vertex);
+                if (verticesMap[key] === undefined) {
+                    verticesMap[key] = newVertices.length / 3; // Store index, not byte offset
+                    newVertices.push(...vertex);
+                }
+                return verticesMap[key];
+            };
+
+            for (let i = 0; i < vertices.length; i += 3) {
+                newIndices.push(dedupeVertex(i));
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(newVertices, 3));
+            geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(newIndices), 1));
+            geometry.computeVertexNormals(); // Recompute normals after merging
+            return geometry;
+        }
+
+
         function init() {
 
             const loader = new GLTFLoader();
             loader.load('flat_1C1.glb', // Путь к вашему файлу
                 function (gltf) {
-                    // Добавляем загруженную модель в сцену
+
                     scene.add(gltf.scene);
                     console.log('Модель успешно загружена:', gltf);
+                    const mirrorsToReplace = []; // Создаем массив для хранения зеркал
 
-                    // Обрабатываем материалы модели
-                    gltf.scene.traverse((node) => {
-                        // console.log("Объект: ", node); // Имя объекта
+                    scene.traverse((node) => {
+                        // console.log("Объект: ", node); // Имя объекта                        
 
                         if (node.isMesh && node.material) {
                             const material = node.material;
-                            node.updateMatrixWorld(true);
 
-                            /* const geometry = node.geometry;
-                             if (geometry.attributes.uv1) {
-                                 console.log(`Объект ${node.name} содержит дополнительный UV-набор (uv1).`);
+
+                            node.updateMatrixWorld(true);
+                            /* if ((material.name && material.name.toLowerCase().includes("mirror")) ||
+                                 (material.metalness >= 0.9 && material.roughness <= 0.1 && material.reflectivity >= 0.8) ||
+                                 (material.userData && material.userData.isMirror)) {
+ 
+ 
+                                 console.log("Найден зеркальный материал:", material.name, node);
+ 
+ 
+                                 const parent = node.parent; // Запоминаем родителя!
+                                 const geometry = node.geometry.clone();
+                                 geometry.computeVertexNormals();
+                                 geometry.attributes.normal.needsUpdate = true;
+ 
+                                 const reflector = new Reflector(geometry, {
+                                     clipBias: 0.0005, // или подберите оптимальное значение
+                                     textureWidth: window.innerWidth * window.devicePixelRatio,
+                                     textureHeight: window.innerHeight * window.devicePixelRatio,
+                                     color: new THREE.Color(0x7f7f7f),
+                                     recursion: 1
+                                 });
+ 
+                                 reflector.position.copy(node.getWorldPosition(new THREE.Vector3()));
+                                 reflector.quaternion.copy(node.getWorldQuaternion(new THREE.Quaternion()));
+                                 reflector.scale.copy(node.getWorldScale(new THREE.Vector3()));
+ 
+                                 scene.add(reflector); // Добавляем в сцену!!!
+                                 parent.remove(node); // Удаляем из родителя!!!
                              }*/
+
 
                             // Вычисляем границы объекта в мировых координатах
                             const boundingBox = new THREE.Box3().setFromObject(node);
@@ -303,8 +371,8 @@
                             // console.log("Границы в мировых координатах:", boundingBox.min, boundingBox.max);
 
                             // Проверяем, есть ли у материала карта эмиссии
-                            /*  if (material.map) console.log('Base Color Map:', material.map);
-                              if (material.normalMap) console.log('Normal Map:', material.normalMap);
+                            // if (material.map) console.log('Base Color Map:', material.map);
+                            /*  if (material.normalMap) console.log('Normal Map:', material.normalMap);
                               if (material.metalnessMap) console.log('Metallic Map:', material.metalnessMap);
                               if (material.roughnessMap) console.log('Roughness Map:', material.roughnessMap);
                               if (material.emissiveMap) console.log('Emissive Map:', material.emissiveMap);*/
@@ -332,6 +400,60 @@
                         }
                     });
 
+
+                    scene.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            const material = node.material;
+
+                            if ((material.name && material.name.toLowerCase().includes("mirror")) ||
+                                (material.metalness >= 0.9 && material.roughness <= 0.1 && material.reflectivity >= 0.8) ||
+                                (material.userData && material.userData.isMirror)) {
+
+                                console.log("Найден зеркальный материал:", material.name, node);
+                                mirrorsToReplace.push(node); // Добавляем меш в массив
+                            }
+                        }
+                    });
+
+                    // После завершения обхода сцены, обрабатываем массив зеркал
+                    for (const node of mirrorsToReplace) {
+                        const parent = node.parent;
+                        var geometry = node.geometry.clone();
+                        // geometry.computeVertexNormals();
+                        // geometry.attributes.normal.needsUpdate = true;
+                        console.log("Geometry:", node.name, geometry);
+
+                        // const simplifiedGeometry = BufferGeometryUtils.mergeVertices(node.geometry.clone());
+                        const planeGeometry = new THREE.PlaneGeometry(0.55, 1.98); // Пример размеров
+
+                        if (node.name === "Cube011") {
+                            geometry = planeGeometry;
+                           
+                        }
+
+                        const reflector = new Reflector(geometry, {
+                            clipBias: 0.0003, // или подберите оптимальное значение
+                            textureWidth: window.innerWidth * 0.8,
+                            textureHeight: window.innerHeight * 0.8,
+                            color: new THREE.Color(0x7f7f7f),
+                            recursion: 0
+                        });
+
+                        reflector.position.copy(node.getWorldPosition(new THREE.Vector3()));
+                        reflector.quaternion.copy(node.getWorldQuaternion(new THREE.Quaternion()));
+                        reflector.scale.copy(node.getWorldScale(new THREE.Vector3()));
+
+                        if (node.name === "Cube011") {
+                           
+                            reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
+                        }
+                        //  reflector.position.x = reflector.position.x + 1.1;
+                        //   reflector.position.z = reflector.position.z - 1.1;
+                        //reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
+                        scene.add(reflector);
+                        parent.remove(node);
+                        scene.remove(node);
+                    }
                     // Устанавливаем блум для куба
                     /*  if (cube) {
                           addBloomEffect(cube);
@@ -343,6 +465,40 @@
                     countTriangles(scene);
                     //visualizeBoundingBoxes(scene);
                     console.log("Все дочерние элементы сцены после :", scene.children);
+                    scene.traverse(function (child) {
+                        if (child instanceof Reflector) {
+                            const mesh = child.parent.children.find(c => c.name === child.name.replace("Reflector", ""));
+                            if (mesh) {
+                                const meshPos = new THREE.Vector3();
+                                mesh.getWorldPosition(meshPos);
+                                const reflectorPos = new THREE.Vector3();
+                                child.getWorldPosition(reflectorPos);
+                                const meshQuat = new THREE.Quaternion();
+                                mesh.getWorldQuaternion(meshQuat);
+                                const reflectorQuat = new THREE.Quaternion();
+                                child.getWorldQuaternion(reflectorQuat);
+                                const meshScale = new THREE.Vector3();
+                                mesh.getWorldScale(meshScale);
+                                const reflectorScale = new THREE.Vector3();
+                                child.getWorldScale(reflectorScale);
+
+                                console.log("Mesh:", mesh.name);
+                                console.log("Mesh Position:", meshPos);
+                                console.log("Reflector Position:", reflectorPos);
+                                console.log("Mesh Quaternion:", meshQuat);
+                                console.log("Reflector Quaternion:", reflectorQuat);
+                                console.log("Mesh Scale:", meshScale);
+                                console.log("Reflector Scale:", reflectorScale);
+
+                                const boxHelperMesh = new THREE.BoxHelper(mesh, 0xff0000); // Красный
+                                const boxHelperReflector = new THREE.BoxHelper(child, 0x00ff00); // Зеленый
+                                scene.add(boxHelperMesh);
+                                scene.add(boxHelperReflector);
+                            }
+                        }
+                    });
+
+
                 },
                 undefined, // Опциональный колбэк прогресса
                 function (error) {
@@ -351,6 +507,8 @@
             );
 
         }
+
+
 
         function visualizeBoundingBoxes(scene) {
             scene.traverse((object) => {
@@ -1050,6 +1208,8 @@
             console.log('Текущая высота рендера:', size.height);
         });
 
+        init();
+
         function animate() {
             // console.log('Рендер кадра');
 
@@ -1058,28 +1218,22 @@
             requestAnimationFrame(animate);
             updateCameraPosition();
 
+            /* scene.traverse(function (child) {
+                 if (child instanceof Reflector) {
+                     child.matrixWorldNeedsUpdate = true; // Возможно, достаточно этой строки
+                     child.onBeforeRender(renderer, scene, camera);
+                 }
+             });*/
+
             renderer.render(scene, camera);
 
-            // composer.render();
-
-            // Обновляем маркер камеры
-            // updateCameraMarker();
-            // Логика обновления LOD
-            /*  lod.update = function () {
-                       const distance = camera.position.distanceTo(lod.position); // Расстояние от камеры до LOD
-                       const currentLevel = lod.levels.findIndex(level => distance >= level.distance);
-           
-                       console.log(`Текущее расстояние до LOD: ${distance.toFixed(2)}`);
-                       console.log(`Текущий уровень LOD: ${currentLevel >= 0 ? currentLevel : "Хай-полигональная модель"}`);
-                   };
-
-              lod.update(); // Вызываем метод обновления LOD*/
+            // composer.render();           
             // Рендер сцены для карты (вид сверху)
             // mapRenderer.render(scene, mapCamera);
             stats.end(); // Конец измерения производительности
         }
 
-        init();
+
         animate();
     </script>
 </body>
