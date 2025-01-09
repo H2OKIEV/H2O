@@ -432,9 +432,9 @@
                         }
 
                         const reflector = new Reflector(geometry, {
-                            clipBias: 0.0003, // или подберите оптимальное значение
-                            textureWidth: window.innerWidth * 0.8,
-                            textureHeight: window.innerHeight * 0.8,
+                            clipBias: 0.001, // или подберите оптимальное значение
+                            textureWidth:  window.innerWidth * 0.8,
+                            textureHeight:  window.innerHeight * 0.8,
                             color: new THREE.Color(0x7f7f7f),
                             recursion: 0
                         });
