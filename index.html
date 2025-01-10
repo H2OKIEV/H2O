@@ -76,7 +76,7 @@
         import * as THREE from 'three';
 
         import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-
+        import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -85,6 +85,7 @@
         import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { Reflector } from 'three/addons/objects/Reflector.js';
+        import { DebugEnvironment } from 'three/addons/environments/DebugEnvironment.js';
         import * as BufferGeometryUtils from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/utils/BufferGeometryUtils.js';
 
 
@@ -107,7 +108,8 @@
 
         scene.add(camera);
 
-        var renderer = new THREE.WebGLRenderer({ antialias: true, /*preserveDrawingBuffer: true/*, alpha: true*/ });
+        var renderer = new THREE.WebGLRenderer({ antialias: true, /*preserveDrawingBuffer: true/*,alpha: true*/});
+       
         renderer.setSize(renderWidth, renderHeight);
         renderer.setPixelRatio(1);
         renderer.domElement.style.width = '100%';
@@ -121,21 +123,21 @@
         console.log('Текущая ширина рендера:', size.width);
         console.log('Текущая высота рендера:', size.height);
 
-        /* renderer.shadowMap.enabled = true; // Включаем карту теней
-         renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)*/
+       /*  renderer.shadowMap.enabled = true; // Включаем карту теней
+         renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)
         // Установите начальное значение экспозиции
-        // renderer.toneMapping = THREE.ReinhardToneMapping;
+         renderer.toneMapping = THREE.ReinhardToneMapping;
         renderer.physicallyCorrectLights = true;
-        // renderer.outputEncoding = THREE.sRGBEncoding;
-        // renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        //renderer.toneMappingExposure = 0.8;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+         renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.8;*/
 
 
-        const pmremGenerator = new THREE.PMREMGenerator(renderer);
-        pmremGenerator.compileEquirectangularShader();
-        const environment = new RoomEnvironment();
-        var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
-        scene.environment = defaultEnvMap;
+         const pmremGenerator = new THREE.PMREMGenerator(renderer);
+         pmremGenerator.compileEquirectangularShader();
+         const environment = new RoomEnvironment();
+         var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
+         scene.environment = defaultEnvMap;
 
         var stats = new Stats();
         stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
@@ -143,8 +145,8 @@
 
 
         // Добавляем окружающий свет
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-        scene.add(ambientLight);
+       /* const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(ambientLight);*/
 
 
 
@@ -423,18 +425,18 @@
                         // geometry.attributes.normal.needsUpdate = true;
                         console.log("Geometry:", node.name, geometry);
 
-                     
-                        const planeGeometry = new THREE.PlaneGeometry(0.55, 1.98); 
+
+                        const planeGeometry = new THREE.PlaneGeometry(0.55, 1.98);
 
                         if (node.name === "Cube011") {
                             geometry = planeGeometry;
-                           
+
                         }
 
                         const reflector = new Reflector(geometry, {
                             clipBias: 0.001, // или подберите оптимальное значение
-                            textureWidth:  window.innerWidth * 0.8,
-                            textureHeight:  window.innerHeight * 0.8,
+                            textureWidth: window.innerWidth * 0.8,
+                            textureHeight: window.innerHeight * 0.8,
                             color: new THREE.Color(0x7f7f7f),
                             recursion: 0
                         });
@@ -444,8 +446,9 @@
                         reflector.scale.copy(node.getWorldScale(new THREE.Vector3()));
 
                         if (node.name === "Cube011") {
-                           
-                            reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
+
+                          //  reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
+                           // reflector.position.x = reflector.position.z + 1.1;
                         }
 
                         //  reflector.position.x = reflector.position.x + 1.1;
@@ -466,39 +469,78 @@
                     countTriangles(scene);
                     //visualizeBoundingBoxes(scene);
                     console.log("Все дочерние элементы сцены после :", scene.children);
-                   /* scene.traverse(function (child) {
-                        if (child instanceof Reflector) {
-                            const mesh = child.parent.children.find(c => c.name === child.name.replace("Reflector", ""));
-                            if (mesh) {
-                                const meshPos = new THREE.Vector3();
-                                mesh.getWorldPosition(meshPos);
-                                const reflectorPos = new THREE.Vector3();
-                                child.getWorldPosition(reflectorPos);
-                                const meshQuat = new THREE.Quaternion();
-                                mesh.getWorldQuaternion(meshQuat);
-                                const reflectorQuat = new THREE.Quaternion();
-                                child.getWorldQuaternion(reflectorQuat);
-                                const meshScale = new THREE.Vector3();
-                                mesh.getWorldScale(meshScale);
-                                const reflectorScale = new THREE.Vector3();
-                                child.getWorldScale(reflectorScale);
+                    /* scene.traverse(function (child) {
+                         if (child instanceof Reflector) {
+                             const mesh = child.parent.children.find(c => c.name === child.name.replace("Reflector", ""));
+                             if (mesh) {
+                                 const meshPos = new THREE.Vector3();
+                                 mesh.getWorldPosition(meshPos);
+                                 const reflectorPos = new THREE.Vector3();
+                                 child.getWorldPosition(reflectorPos);
+                                 const meshQuat = new THREE.Quaternion();
+                                 mesh.getWorldQuaternion(meshQuat);
+                                 const reflectorQuat = new THREE.Quaternion();
+                                 child.getWorldQuaternion(reflectorQuat);
+                                 const meshScale = new THREE.Vector3();
+                                 mesh.getWorldScale(meshScale);
+                                 const reflectorScale = new THREE.Vector3();
+                                 child.getWorldScale(reflectorScale);
+ 
+                                 console.log("Mesh:", mesh.name);
+                                 console.log("Mesh Position:", meshPos);
+                                 console.log("Reflector Position:", reflectorPos);
+                                 console.log("Mesh Quaternion:", meshQuat);
+                                 console.log("Reflector Quaternion:", reflectorQuat);
+                                 console.log("Mesh Scale:", meshScale);
+                                 console.log("Reflector Scale:", reflectorScale);
+ 
+                                 const boxHelperMesh = new THREE.BoxHelper(mesh, 0xff0000); // Красный
+                                 const boxHelperReflector = new THREE.BoxHelper(child, 0x00ff00); // Зеленый
+                                 scene.add(boxHelperMesh);
+                                 scene.add(boxHelperReflector);
+                             }
+                         }
+                     });*/
+                   /*  const pmremGenerator = new THREE.PMREMGenerator( renderer );
+                     pmremGenerator.compileCubemapShader();
+                     const envScene = new DebugEnvironment();
+                    var generatedCubeRenderTarget = pmremGenerator.fromScene( envScene );
+                    scene.background = generatedCubeRenderTarget.texture;
+                    scene.environment = generatedCubeRenderTarget.texture;*/
 
-                                console.log("Mesh:", mesh.name);
-                                console.log("Mesh Position:", meshPos);
-                                console.log("Reflector Position:", reflectorPos);
-                                console.log("Mesh Quaternion:", meshQuat);
-                                console.log("Reflector Quaternion:", reflectorQuat);
-                                console.log("Mesh Scale:", meshScale);
-                                console.log("Reflector Scale:", reflectorScale);
+                    /* const pmremGenerator = new THREE.PMREMGenerator(renderer);
+         pmremGenerator.compileEquirectangularShader();
+         const environment = new DebugEnvironment();
+         var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
+         scene.environment = defaultEnvMap;*/
 
-                                const boxHelperMesh = new THREE.BoxHelper(mesh, 0xff0000); // Красный
-                                const boxHelperReflector = new THREE.BoxHelper(child, 0x00ff00); // Зеленый
-                                scene.add(boxHelperMesh);
-                                scene.add(boxHelperReflector);
-                            }
+                   /* var exrLoader = new EXRLoader();
+                    exrLoader.load(
+                        'footprint_court_2k.exr', // Укажите путь к вашему EXR-файлу
+                        function (texture) {
+                            // Применение текстуры к материалу
+                            texture.minFilter = THREE.LinearFilter; // Устанавливаем фильтр
+                            texture.magFilter = THREE.LinearFilter;
+                            texture.encoding = THREE.LinearEncoding;
+
+                            var hdrTexture = texture;
+                            scene.background = texture;
+
+                            var envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+                            scene.environment = envMap;
+                            scene.environment.encoding = THREE.sRGBEncoding;
+                            
+                           
+
+
+                        },
+                        function (xhr) {
+                            console.log((xhr.loaded / xhr.total * 100) + '% загружено');
+                        },
+                        function (error) {
+                            console.error('Ошибка при загрузке EXR-файла:', error);
                         }
-                    });*/
-
+                    );*/
 
                 },
                 undefined, // Опциональный колбэк прогресса
