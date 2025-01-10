@@ -129,15 +129,15 @@
          renderer.toneMapping = THREE.ReinhardToneMapping;
         renderer.physicallyCorrectLights = true;
         renderer.outputEncoding = THREE.sRGBEncoding;
-         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.8;*/
+         renderer.toneMapping = THREE.ACESFilmicToneMapping;*/
+        renderer.toneMappingExposure = 0.6;
 
 
-       /*  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+         const pmremGenerator = new THREE.PMREMGenerator(renderer);
          pmremGenerator.compileEquirectangularShader();
          const environment = new RoomEnvironment();
          var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
-         scene.environment = defaultEnvMap;*/
+         scene.environment = defaultEnvMap;
 
         var stats = new Stats();
         stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
