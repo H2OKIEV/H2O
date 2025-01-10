@@ -531,37 +531,37 @@
                         (material.metalness >= 0.9 && material.roughness <= 0.1 && material.reflectivity >= 0.8) ||
                         (material.userData && material.userData.isMirror)) {
 
-                     /*   console.log("Найден объект:", node.name);
-
-                        // Выводим локальные трансформации
-                        console.log("Local Position:", node.position);
-                        console.log("Local Quaternion:", node.quaternion);
-                        console.log("Local Scale:", node.scale);
-                        console.log("Local Matrix:", node.matrix);
-                        if (node.matrixWorldNeedsUpdate) {
-                            console.log("matrixWorldNeedsUpdate is true for:", node.name);
-                        } else {
-                            console.log("matrixWorldNeedsUpdate is false for:", node.name);
-                        }
-                        updateWorldMatricesRecursively(node);
-                        console.log("World Matrix (после updateWorldMatricesRecursively):", node.matrixWorld);
-
-                        const worldPosition = new THREE.Vector3();
-                        node.getWorldPosition(worldPosition);
-                        console.log("World Position:", worldPosition);
-
-                        const worldQuaternion = new THREE.Quaternion();
-                        node.getWorldQuaternion(worldQuaternion);
-                        console.log("World Quaternion:", worldQuaternion);
-
-                        const worldScale = new THREE.Vector3();
-                        node.getWorldScale(worldScale);
-                        console.log("World Scale:", worldScale);
-
-                        // Дополнительная проверка: преобразование локальных координат в мировые вручную
-                        const manualWorldPosition = new THREE.Vector3().copy(node.position).applyMatrix4(node.matrixWorld);
-                        console.log("Manual World Position:", manualWorldPosition);
-*/
+                        /*   console.log("Найден объект:", node.name);
+   
+                           // Выводим локальные трансформации
+                           console.log("Local Position:", node.position);
+                           console.log("Local Quaternion:", node.quaternion);
+                           console.log("Local Scale:", node.scale);
+                           console.log("Local Matrix:", node.matrix);
+                           if (node.matrixWorldNeedsUpdate) {
+                               console.log("matrixWorldNeedsUpdate is true for:", node.name);
+                           } else {
+                               console.log("matrixWorldNeedsUpdate is false for:", node.name);
+                           }
+                           updateWorldMatricesRecursively(node);
+                           console.log("World Matrix (после updateWorldMatricesRecursively):", node.matrixWorld);
+   
+                           const worldPosition = new THREE.Vector3();
+                           node.getWorldPosition(worldPosition);
+                           console.log("World Position:", worldPosition);
+   
+                           const worldQuaternion = new THREE.Quaternion();
+                           node.getWorldQuaternion(worldQuaternion);
+                           console.log("World Quaternion:", worldQuaternion);
+   
+                           const worldScale = new THREE.Vector3();
+                           node.getWorldScale(worldScale);
+                           console.log("World Scale:", worldScale);
+   
+                           // Дополнительная проверка: преобразование локальных координат в мировые вручную
+                           const manualWorldPosition = new THREE.Vector3().copy(node.position).applyMatrix4(node.matrixWorld);
+                           console.log("Manual World Position:", manualWorldPosition);
+   */
 
                         console.log("Найден зеркальный материал:", material.name, node);
                         // mirrorsToReplace.push(node); // Добавляем меш в массив
@@ -634,12 +634,9 @@
                 }
 
                 if (mirrorData.node.name === "Cube053") {
-                    reflector.rotateY(Math.PI  );
+                    reflector.rotateY(Math.PI);
                     reflector.rotation.y -= 0.37;
-                   // reflector.rotation.x += 0.10;
-                   // reflector.rotation.x = 15; 
-                   reflector.position.y += 0.32;
-
+                    reflector.position.y += 0.32;
                 }
 
                 scene.add(reflector);
@@ -654,38 +651,38 @@
                 removeNode(node);
             }
 
-           /* scene.traverse(function (child) {
-                if (child instanceof Reflector) {
-                    const mesh = child.parent.children.find(c => c.name === child.name.replace("Reflector", ""));
-                    if (mesh) {
-                        const meshPos = new THREE.Vector3();
-                        mesh.getWorldPosition(meshPos);
-                        const reflectorPos = new THREE.Vector3();
-                        child.getWorldPosition(reflectorPos);
-                        const meshQuat = new THREE.Quaternion();
-                        mesh.getWorldQuaternion(meshQuat);
-                        const reflectorQuat = new THREE.Quaternion();
-                        child.getWorldQuaternion(reflectorQuat);
-                        const meshScale = new THREE.Vector3();
-                        mesh.getWorldScale(meshScale);
-                        const reflectorScale = new THREE.Vector3();
-                        child.getWorldScale(reflectorScale);
-
-                        console.log("Mesh:", mesh.name);
-                        console.log("Mesh Position:", meshPos);
-                        console.log("Reflector Position:", reflectorPos);
-                        console.log("Mesh Quaternion:", meshQuat);
-                        console.log("Reflector Quaternion:", reflectorQuat);
-                        console.log("Mesh Scale:", meshScale);
-                        console.log("Reflector Scale:", reflectorScale);
-
-                        const boxHelperMesh = new THREE.BoxHelper(mesh, 0xff0000); // Красный
-                        const boxHelperReflector = new THREE.BoxHelper(child, 0x00ff00); // Зеленый
-                        scene.add(boxHelperMesh);
-                        scene.add(boxHelperReflector);
-                    }
-                }
-            });*/
+            /* scene.traverse(function (child) {
+                 if (child instanceof Reflector) {
+                     const mesh = child.parent.children.find(c => c.name === child.name.replace("Reflector", ""));
+                     if (mesh) {
+                         const meshPos = new THREE.Vector3();
+                         mesh.getWorldPosition(meshPos);
+                         const reflectorPos = new THREE.Vector3();
+                         child.getWorldPosition(reflectorPos);
+                         const meshQuat = new THREE.Quaternion();
+                         mesh.getWorldQuaternion(meshQuat);
+                         const reflectorQuat = new THREE.Quaternion();
+                         child.getWorldQuaternion(reflectorQuat);
+                         const meshScale = new THREE.Vector3();
+                         mesh.getWorldScale(meshScale);
+                         const reflectorScale = new THREE.Vector3();
+                         child.getWorldScale(reflectorScale);
+ 
+                         console.log("Mesh:", mesh.name);
+                         console.log("Mesh Position:", meshPos);
+                         console.log("Reflector Position:", reflectorPos);
+                         console.log("Mesh Quaternion:", meshQuat);
+                         console.log("Reflector Quaternion:", reflectorQuat);
+                         console.log("Mesh Scale:", meshScale);
+                         console.log("Reflector Scale:", reflectorScale);
+ 
+                         const boxHelperMesh = new THREE.BoxHelper(mesh, 0xff0000); // Красный
+                         const boxHelperReflector = new THREE.BoxHelper(child, 0x00ff00); // Зеленый
+                         scene.add(boxHelperMesh);
+                         scene.add(boxHelperReflector);
+                     }
+                 }
+             });*/
         }
 
         function visualizeBoundingBoxes(scene) {
