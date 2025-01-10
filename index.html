@@ -133,11 +133,11 @@
         renderer.toneMappingExposure = 0.8;*/
 
 
-         const pmremGenerator = new THREE.PMREMGenerator(renderer);
+       /*  const pmremGenerator = new THREE.PMREMGenerator(renderer);
          pmremGenerator.compileEquirectangularShader();
          const environment = new RoomEnvironment();
          var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
-         scene.environment = defaultEnvMap;
+         scene.environment = defaultEnvMap;*/
 
         var stats = new Stats();
         stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
@@ -145,8 +145,8 @@
 
 
         // Добавляем окружающий свет
-       /* const ambientLight = new THREE.AmbientLight(0xffffff, 2);
-        scene.add(ambientLight);*/
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(ambientLight);
 
 
 
@@ -447,7 +447,7 @@
 
                         if (node.name === "Cube011") {
 
-                          //  reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
+                            reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
                            // reflector.position.x = reflector.position.z + 1.1;
                         }
 
@@ -469,7 +469,7 @@
                     countTriangles(scene);
                     //visualizeBoundingBoxes(scene);
                     console.log("Все дочерние элементы сцены после :", scene.children);
-                    /* scene.traverse(function (child) {
+                     scene.traverse(function (child) {
                          if (child instanceof Reflector) {
                              const mesh = child.parent.children.find(c => c.name === child.name.replace("Reflector", ""));
                              if (mesh) {
@@ -500,7 +500,7 @@
                                  scene.add(boxHelperReflector);
                              }
                          }
-                     });*/
+                     });
                    /*  const pmremGenerator = new THREE.PMREMGenerator( renderer );
                      pmremGenerator.compileCubemapShader();
                      const envScene = new DebugEnvironment();
