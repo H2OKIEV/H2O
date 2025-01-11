@@ -93,6 +93,8 @@
         import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
         import { ColladaLoader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/ColladaLoader.js';
         import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/FBXLoader.js';
+        import { SSAOPass } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/postprocessing/SSAOPass.js';
+        //import { EffectPass } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/postprocessing.esm.js';
 
         import { Sky } from 'three/addons/objects/Sky.js';
 
@@ -712,6 +714,19 @@
             antialias: true // Включаем сглаживание для постобработки
         });
 
+
+// Добавляем SSAO
+const width = window.innerWidth; // Ширина окна браузера
+const height = window.innerHeight; // Высота окна браузера
+const ssaoPass = new SSAOPass( scene, camera, width, height );
+ssaoPass.kernelRadius = 8;
+ssaoPass.intensity = 1.2;
+ssaoPass.kernelSize = 16;
+ssaoPass.minDistance = 0.01;
+ssaoPass.maxDistance = 0.2;
+ssaoPass.output = SSAOPass.OUTPUT.Default;
+
+
         // Композитор для постобработки
         let composer = new EffectComposer(renderer/*, renderTarget*/);
 
@@ -752,11 +767,11 @@
             // Настройка порога сглаживания (threshold) и силы (spread), чтобы увеличить сглаживание
 
             const outputPass = new OutputPass();
-
-
+           
+           
             composer.addPass(renderPass);
             // composer.addPass(bloomPass);
-
+            composer.addPass( ssaoPass );
             composer.addPass(outputPass);
             composer.addPass(fxaaPass);  // Добавляем FXAA для сглаживания
         }
