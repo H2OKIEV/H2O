@@ -80,7 +80,7 @@
         import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/postprocessing/RenderPass.js';
         import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -88,7 +88,7 @@
         import { Reflector } from 'three/addons/objects/Reflector.js';
         import { DebugEnvironment } from 'three/addons/environments/DebugEnvironment.js';
         import { RGBELoader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/RGBELoader.js';
-
+        import { FXAAShader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/shaders/FXAAShader.js';
         import * as BufferGeometryUtils from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/utils/BufferGeometryUtils.js';
 
 
@@ -115,7 +115,7 @@
 
         scene.add(camera);
 
-        var renderer = new THREE.WebGLRenderer({ antialias: true, /*preserveDrawingBuffer: true/*,alpha: true*/ });
+        var renderer = new THREE.WebGLRenderer({ /*antialias: true,*/ /*preserveDrawingBuffer: true/*,alpha: true*/ });
 
         renderer.setSize(renderWidth, renderHeight);
         renderer.setPixelRatio(1);
@@ -130,15 +130,15 @@
         console.log('Текущая ширина рендера:', size.width);
         console.log('Текущая высота рендера:', size.height);
 
-        renderer.shadowMap.enabled = true; // Включаем карту теней
-        renderer.shadowMap.type = THREE.BasicShadowMap; // Настройка типа теней (мягкие)
+        // renderer.shadowMap.enabled = true; // Включаем карту теней
+        // renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Настройка типа теней (мягкие)
         // Установите начальное значение экспозиции
         renderer.toneMapping = THREE.ReinhardToneMapping;
         renderer.physicallyCorrectLights = true;
-        //  renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.outputEncoding = THREE.sRGBEncoding;
         // renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        // renderer.toneMappingExposure = 0.6;
-
+        renderer.toneMappingExposure = 1.0;
+        renderer.debug.checkShaderErrors = true;
 
         /*  const pmremGenerator = new THREE.PMREMGenerator(renderer);
           pmremGenerator.compileEquirectangularShader();
@@ -152,34 +152,34 @@
 
 
 
-        /*   const sky = new Sky();
-   sky.scale.setScalar(450000); // Размер неба
-   scene.add(sky);
-   
-   // Параметры неба
-   const skyParams = {
-       turbidity: 10, // Мутность
-       rayleigh: 2,   // Рассеивание
-       mieCoefficient: 0.005, // Коэффициент Ми
-       mieDirectionalG: 0.8, // Анизотропия Ми
-       elevation: 20, // Угол высоты солнца
-       azimuth: 180   // Азимут солнца
-   };
-   
-   // Обновление материала Sky
-   function updateSky() {
-       const sun = new THREE.Vector3();
-       const phi = THREE.MathUtils.degToRad(90 - skyParams.elevation);
-       const theta = THREE.MathUtils.degToRad(skyParams.azimuth);
-   
-       sun.setFromSphericalCoords(1, phi, theta);
-       sky.material.uniforms['sunPosition'].value.copy(sun);
-   }
-   updateSky();
-   
-   // Источник света
-   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-   scene.add(directionalLight);*/
+        /*    const sky = new Sky();
+     sky.scale.setScalar(450000); // Размер неба
+     scene.add(sky);
+     
+     // Параметры неба
+     const skyParams = {
+         turbidity: 10, // Мутность
+         rayleigh: 2,   // Рассеивание
+         mieCoefficient: 0.005, // Коэффициент Ми
+         mieDirectionalG: 0.8, // Анизотропия Ми
+         elevation: 20, // Угол высоты солнца
+         azimuth: 180   // Азимут солнца
+     };
+     
+     // Обновление материала Sky
+     function updateSky() {
+         const sun = new THREE.Vector3();
+         const phi = THREE.MathUtils.degToRad(90 - skyParams.elevation);
+         const theta = THREE.MathUtils.degToRad(skyParams.azimuth);
+     
+         sun.setFromSphericalCoords(1, phi, theta);
+         sky.material.uniforms['sunPosition'].value.copy(sun);
+     }
+     updateSky();
+     */
+        // Источник света
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        scene.add(directionalLight);
 
         // Добавляем окружающий свет
         /*const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -287,7 +287,7 @@
         yaw = cameraRotation.y;
         pitch = cameraRotation.x;
         // Переменные для визуализации raycast
-        let rayLine;
+        
         const rayLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Красный цвет для линии
         const rayLineGeometry = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(0, 0, 0),  // Начальная точка
@@ -300,48 +300,13 @@
          scene.add(clickMarker); // Добавляем в сцену*/
 
         // Создаем линию и добавляем ее в сцену
-        rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
+        let rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
         scene.add(rayLine);
 
-        /*  const planeGeometry = new THREE.PlaneGeometry(0.5, 1.5); // Пример размеров
-          const plane = new Reflector(planeGeometry, {
-              clipBias: 0.0003, // Подбирайте значение
-              textureWidth: window.innerWidth * window.devicePixelRatio,
-              textureHeight: window.innerHeight * window.devicePixelRatio,
-              color: new THREE.Color(0x7f7f7f),
-              recursion: 0
-          });
-          plane.rotation.y = Math.PI / 2; // Поворачиваем, если нужно
-          plane.position.set(1, 1.5, 1)
-          scene.add(plane);
-  */
+       
 
         const bloomLayer = new THREE.Layers(); // Для блума
-        function mergeVertices(geometry) {
-            const vertices = geometry.attributes.position.array;
-            const verticesMap = {};
-            const newVertices = [];
-            const newIndices = [];
-
-            let dedupeVertex = (i) => {
-                const vertex = vertices.slice(i, i + 3);
-                const key = JSON.stringify(vertex);
-                if (verticesMap[key] === undefined) {
-                    verticesMap[key] = newVertices.length / 3; // Store index, not byte offset
-                    newVertices.push(...vertex);
-                }
-                return verticesMap[key];
-            };
-
-            for (let i = 0; i < vertices.length; i += 3) {
-                newIndices.push(dedupeVertex(i));
-            }
-
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(newVertices, 3));
-            geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(newIndices), 1));
-            geometry.computeVertexNormals(); // Recompute normals after merging
-            return geometry;
-        }
+        
 
 
         function removeNode(node) {
@@ -361,7 +326,23 @@
 
                     scene.add(gltf.scene);
                     console.log('Модель успешно загружена:', gltf);
-                    const mirrorsToReplace = []; // Создаем массив для хранения зеркал
+
+                    // Проходим по всем материалам в загруженной модели
+                    /* scene.traverse(function (child) {
+                         if (child.isMesh && child.material.map) {
+                             console.log('Texture found on', child.name, child.material.map);
+ 
+                             // Убедитесь, что текстура правильно загружена и инициализирована
+                             const texture = child.material.map;
+                             if (texture) {
+                                 texture.minFilter = THREE.LinearMipmapLinearFilter; // Устанавливаем фильтрацию мип-карт
+                                 texture.generateMipmaps = true; // Генерируем мип-карты
+                                 texture.needsUpdate = true; // Обновляем текстуру
+                             }
+                         }
+                     });*/
+
+                   
                     /* const pmremGenerator = new THREE.PMREMGenerator(renderer);
                      // Генерируем текстуру окружения
                      const envMap = pmremGenerator.fromScene(scene).texture;
@@ -376,13 +357,25 @@
                     scene.traverse((node) => {
                         // console.log("Объект: ", node); // Имя объекта                        
 
+
+
                         if (node.isMesh && node.material) {
                             const material = node.material;
+                            // console.log("материалы", node.material); // Проверяем материалы
+                            //console.log("карту шероховатости", node.material.roughnessMap);
 
-
-                            //node.updateMatrixWorld(true);
-
-
+                            node.updateMatrixWorld(true);
+                            /*  node.castShadow = true;
+                              node.receiveShadow = true;
+                              if ( node.name.toLowerCase().includes("lamp") || node.name.toLowerCase().includes("light")) {
+                                  // Добавляем точечный свет к лампе
+                                  console.log("Найдена лампа:", material.name, node);
+                                  const pointLight = new THREE.PointLight(0xffffff, 3, 10);
+                                  pointLight.position.copy(node.getWorldPosition(new THREE.Vector3()));  // Совмещаем позицию света с лампой
+                                  pointLight.castShadow = true;  // Включаем отбрасывание теней
+                                  pointLight.shadow.bias = -0.005; 
+                                  scene.add(pointLight);
+                              }*/
 
                             // Вычисляем границы объекта в мировых координатах
                             const boundingBox = new THREE.Box3().setFromObject(node);
@@ -411,13 +404,13 @@
                               if (material.emissiveMap) console.log('Emissive Map:', material.emissiveMap);*/
 
                             // Если объект с именем "Cube", то добавляем точечный свет
-                            if (node.name === "Hall_lamp1") {
-                                material.emissiveIntensity = 1;
-                                //cube = node; // Сохраняем ссылку на куб для дальнейшей работы с ним
-                                node.layers.enable(bloomLayer); // Включаем слой для блума
-                                material.emissiveIntensity = 1;
-                                console.log('Интенсивность эмиссии для Cube установлена в 20');
-                            }
+                            /* if (node.name === "Hall_lamp1") {
+                                 material.emissiveIntensity = 1;
+                                 //cube = node; // Сохраняем ссылку на куб для дальнейшей работы с ним
+                                 node.layers.enable(bloomLayer); // Включаем слой для блума
+                                 material.emissiveIntensity = 1;
+                                 console.log('Интенсивность эмиссии для Cube установлена в 20');
+                             }*/
 
                             if (material.emissiveMap) {
                                 console.log('Интенсивность эмиссии:', material.emissiveIntensity, node.name);
@@ -439,10 +432,10 @@
                       }*/
 
                     // Настроим эффект композиции
-                    // setupPostProcessing();
+                   
 
                     countTriangles(scene);
-                    //visualizeBoundingBoxes(scene);
+                   
                     console.log("Все дочерние элементы сцены после :", scene.children);
 
                     /*  const pmremGenerator = new THREE.PMREMGenerator( renderer );
@@ -452,7 +445,7 @@
                      scene.background = generatedCubeRenderTarget.texture;
                      scene.environment = generatedCubeRenderTarget.texture;*/
 
-                    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+                    //const pmremGenerator = new THREE.PMREMGenerator(renderer);
                     /* pmremGenerator.compileEquirectangularShader();
                      const environment = new DebugEnvironment();
                      var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
@@ -468,38 +461,18 @@
                         //scene.background = texture;
                     });
 
-                    /* var exrLoader = new EXRLoader();
-                      exrLoader.load(
-                          'footprint_court_2k.exr', // Укажите путь к вашему EXR-файлу
-                          function (texture) {
-                              // Применение текстуры к материалу
-                              texture.minFilter = THREE.LinearFilter; // Устанавливаем фильтр
-                              texture.magFilter = THREE.LinearFilter;
-                              texture.encoding = THREE.LinearEncoding;
-  
-                              var hdrTexture = texture;
-                              scene.background = texture;
-  
-                              var envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
-                              scene.environment = envMap;
-                             // scene.environment.encoding = THREE.sRGBEncoding;
-                              
-                             
-  
-  
-                          },
-                          function (xhr) {
-                              console.log((xhr.loaded / xhr.total * 100) + '% загружено');
-                          },
-                          function (error) {
-                              console.error('Ошибка при загрузке EXR-файла:', error);
-                          }
-                      );*/
+                   
 
-                    checkMirror();
+                   // checkMirror();
+                    setupPostProcessing();
 
                 },
-                undefined, // Опциональный колбэк прогресса
+                function (xhr) {
+
+                    // Функция, которая вызывается во время загрузки (для отслеживания прогресса)
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+                }, // Опциональный колбэк прогресса
                 function (error) {
                     console.error('Ошибка при загрузке модели:', error);
                 }
@@ -573,11 +546,11 @@
                         if (node.name === "Cube011") {
                             geometry = planeGeometry;
                         }
-                        const planeGeometry2 = new THREE.PlaneGeometry(0.2, 0.8);
-                        if (node.name === "Cube053") {
-                            geometry = planeGeometry2;
-
-                        }
+                        /* const planeGeometry2 = new THREE.PlaneGeometry(0.2, 0.8);
+                         if (node.name === "Cube053") {
+                             geometry = planeGeometry2;
+ 
+                         }*/
 
                         /* const reflector = new Reflector(geometry, {
                              clipBias: 0.001, // или подберите оптимальное значение
@@ -619,10 +592,10 @@
             for (const mirrorData of mirrorsData) {
                 const reflector = new Reflector(mirrorData.geometry, {
                     clipBias: 0.001,
-                    textureWidth: window.innerWidth * 0.8,
-                    textureHeight: window.innerHeight * 0.8,
+                    textureWidth: 512,
+                    textureHeight: 512,
                     color: new THREE.Color(0x7f7f7f),
-                    recursion: 0
+                    recursion: 1
                 });
 
                 reflector.position.copy(mirrorData.position);
@@ -633,11 +606,11 @@
                     reflector.rotateY(Math.PI / 2);
                 }
 
-                if (mirrorData.node.name === "Cube053") {
-                    reflector.rotateY(Math.PI);
-                    reflector.rotation.y -= 0.37;
-                    reflector.position.y += 0.32;
-                }
+                /*  if (mirrorData.node.name === "Cube053") {
+                      reflector.rotateY(Math.PI);
+                      reflector.rotation.y -= 0.37;
+                      reflector.position.y += 0.32;
+                  }*/
 
                 scene.add(reflector);
                 scene.remove(mirrorData.node);
@@ -683,57 +656,25 @@
                      }
                  }
              });*/
-        }
-
-        function visualizeBoundingBoxes(scene) {
-            scene.traverse((object) => {
-                // Проверяем, является ли объект мешем
-
-                if (object.isMesh) {
-                    // Исключаем конкретный объект, например, "Circle001"
-                    if (object.name == "Circle001") return;
-
-                    // Создаем BoxHelper для каждого меша
-
-
-                    const boxHelper = new THREE.BoxHelper(object, 0x0000ff);
-                    boxHelper.name = "boxHelper_" + object.name; // Добавляем имя для упрощения поиска
-                    scene.add(boxHelper);
-                    console.log(object);
-                    console.log(boxHelper);
-                }
-
-                // Если объект является группой, рекурсивно проходим по его дочерним объектам
-                /*  if (object.isGroup) {
-                      object.traverse((child) => {
-                          if (child.isMesh && child.name !== "Circle001") {
-                              const boxHelper = new THREE.BoxHelper(child, 0x0000ff);
-                              boxHelper.name = "boxHelper_" + child.name;
-                              scene.add(boxHelper);
-                          }
-                      });
-                  }
-  
-                  if (object instanceof THREE.Object3D) {
-                      object.traverse((child) => {
-                          if (child.isMesh && child.name !== "Circle001") {
-                              const boxHelper = new THREE.BoxHelper(child, 0x0000ff);
-                              boxHelper.name = "boxHelper_" + child.name;
-                              scene.add(boxHelper);
-                          }
-                      });
-                  }*/
-
-            });
-
-            // Логируем все дочерние элементы сцены
-            console.log("Все дочерние элементы сцены:", scene.children);
-        }
+        }        
 
 
 
         let cube, bloomPass;
-        let composer;
+        
+        // Создаем render target для постобработки с сглаживанием
+        const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.LinearFilter,
+            format: THREE.RGBFormat,
+           // antialias: true // Включаем сглаживание для постобработки
+        });
+
+        // Композитор для постобработки
+        let composer = new EffectComposer(renderer, renderTarget);
+
+ 
+
 
         function addBloomEffect(cube) {
             if (cube) {
@@ -746,28 +687,31 @@
         // Настроим постобработку
         function setupPostProcessing() {
             // Создаем основной рендер-процесс
-            const renderPass = new THREE.RenderPass(scene, camera);
+            const renderPass = new RenderPass(scene, camera);
 
             // Создаем bloom-эффект
-            bloomPass = new THREE.UnrealBloomPass(
+         /*   bloomPass = new UnrealBloomPass(
                 new THREE.Vector2(window.innerWidth, window.innerHeight),
                 1.5, // Интенсивность
                 0.4, // Радиус
                 0.85 // Порог
-            );
+            );*/
 
-            // Создаем render target для постобработки с сглаживанием
-            const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-                minFilter: THREE.LinearFilter,
-                magFilter: THREE.LinearFilter,
-                format: THREE.RGBFormat,
-                antialias: true // Включаем сглаживание для постобработки
-            });
+            // Создаем пасс для FXAA (сглаживание)
+            /* const fxaaPass = new ShaderPass(FXAAShader);
+             fxaaPass.uniforms['resolution'].value = new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight);*/
+            // fxaaPass.uniforms['threshold'].value = 0.2;  // Можно изменить для более агрессивного сглаживания
+            //fxaaPass.uniforms['subpixel'].value = 0.75;  // Может уменьшить эффект "псевдошумных" сглаженных областей
+            const fxaaPass = new ShaderPass(FXAAShader);
+            fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * renderer.getPixelRatio());
+            fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * renderer.getPixelRatio());
 
-            // Композитор для постобработки
-            composer = new THREE.EffectComposer(renderer, renderTarget);
+
+
+
             composer.addPass(renderPass);
-            composer.addPass(bloomPass);
+           // composer.addPass(bloomPass);
+            composer.addPass(fxaaPass);  // Добавляем FXAA для сглаживания
         }
 
 
@@ -1402,7 +1346,7 @@
 
             renderer.render(scene, camera);
 
-            // composer.render();           
+            composer.render();
             // Рендер сцены для карты (вид сверху)
             // mapRenderer.render(scene, mapCamera);
             stats.end(); // Конец измерения производительности
