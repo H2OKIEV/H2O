@@ -155,9 +155,9 @@
         stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
         document.body.appendChild(stats.dom);
         const params = {
-				
-				exposure: 1
-			};
+
+            exposure: 1
+        };
         const gui = new GUI();
 
         const toneMappingFolder = gui.addFolder('tone mapping');
@@ -165,7 +165,7 @@
         toneMappingFolder.add(params, 'exposure', 0.1, 2).onChange(function (value) {
 
             renderer.toneMappingExposure = Math.pow(value, 4.0);
-           // render();
+            // render();
 
         });
         /*    const sky = new Sky();
@@ -383,7 +383,7 @@
 
 
                     scene.traverse((node) => {
-                         //console.log("Объект: ", node); // Имя объекта                        
+                        //console.log("Объект: ", node); // Имя объекта                        
 
 
 
@@ -758,14 +758,14 @@
             // Настройка порога сглаживания (threshold) и силы (spread), чтобы увеличить сглаживание
 
             const outputPass = new OutputPass();
-           
-           
+
+
             composer.addPass(renderPass);
             // composer.addPass(bloomPass);
-           
+
             composer.addPass(outputPass);
             composer.addPass(fxaaPass);  // Добавляем FXAA для сглаживания
-            
+
         }
 
 
@@ -975,7 +975,9 @@
                     continue;
                 if (child.name === "boxHelper_Body45_2")
                     continue;
-                    if (child.name === "boxHelper_wall_and_ceillings")
+                if (child.name === "boxHelper_wall_and_ceillings")
+                    continue;
+                if (child.name === "walls")
                     continue;
                 if (child instanceof THREE.BoxHelper) {
                     const box = new THREE.Box3().setFromObject(child.object);
@@ -1014,7 +1016,7 @@
             let wallAndCeilingsBox = null;
 
             for (const child of scene.children) {
-                if ((child.name === "boxHelper_Body45" || child.name == "boxHelper_wall_and_ceillings") && child instanceof THREE.BoxHelper) {
+                if ((child.name === "boxHelper_Body45" || child.name == "boxHelper_wall_and_ceillings" || child.name == "walls") && child instanceof THREE.BoxHelper) {
                     wallAndCeilingsBox = new THREE.Box3().setFromObject(child.object);
                     break;
                 }
