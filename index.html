@@ -977,7 +977,7 @@
                     continue;
                 if (child.name === "boxHelper_wall_and_ceillings")
                     continue;
-                if (child.name === "walls")
+                if (child.name === "boxHelper_walls")
                     continue;
                 if (child instanceof THREE.BoxHelper) {
                     const box = new THREE.Box3().setFromObject(child.object);
@@ -1016,7 +1016,7 @@
             let wallAndCeilingsBox = null;
 
             for (const child of scene.children) {
-                if ((child.name === "boxHelper_Body45" || child.name == "boxHelper_wall_and_ceillings" || child.name == "walls") && child instanceof THREE.BoxHelper) {
+                if ((child.name === "boxHelper_Body45" || child.name == "boxHelper_wall_and_ceillings" || child.name == "boxHelper_walls") && child instanceof THREE.BoxHelper) {
                     wallAndCeilingsBox = new THREE.Box3().setFromObject(child.object);
                     break;
                 }
