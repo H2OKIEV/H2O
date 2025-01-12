@@ -977,8 +977,14 @@
                     continue;
                 if (child.name === "boxHelper_wall_and_ceillings")
                     continue;
+                    if (child.name === "boxHelper_ceillings")
+                    continue;
                 if (child.name === "boxHelper_walls")
                     continue;
+                    if (child.name === "boxHelper_marble_bath")
+                    continue;
+
+                    
                 if (child instanceof THREE.BoxHelper) {
                     const box = new THREE.Box3().setFromObject(child.object);
                     const personBox = new THREE.Box3(
