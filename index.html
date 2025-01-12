@@ -715,16 +715,7 @@
         });
 
 
-// Добавляем SSAO
-const width = window.innerWidth; // Ширина окна браузера
-const height = window.innerHeight; // Высота окна браузера
-const ssaoPass = new SSAOPass( scene, camera, width, height );
-ssaoPass.kernelRadius = 8;
-ssaoPass.intensity = 1.2;
-ssaoPass.kernelSize = 16;
-ssaoPass.minDistance = 0.01;
-ssaoPass.maxDistance = 0.2;
-ssaoPass.output = SSAOPass.OUTPUT.Default;
+
 
 
         // Композитор для постобработки
@@ -771,9 +762,10 @@ ssaoPass.output = SSAOPass.OUTPUT.Default;
            
             composer.addPass(renderPass);
             // composer.addPass(bloomPass);
-            composer.addPass( ssaoPass );
+           
             composer.addPass(outputPass);
             composer.addPass(fxaaPass);  // Добавляем FXAA для сглаживания
+            
         }
 
 
