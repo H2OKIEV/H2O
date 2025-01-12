@@ -383,7 +383,7 @@
 
 
                     scene.traverse((node) => {
-                        // console.log("Объект: ", node); // Имя объекта                        
+                         console.log("Объект: ", node); // Имя объекта                        
 
 
 
@@ -432,7 +432,7 @@
                             boxHelper.position.copy(node.getWorldPosition(new THREE.Vector3())); // Переносим BoxHelper в мировую позицию
                             boxHelper.scale.copy(node.getWorldScale(new THREE.Vector3())); // Учитываем масштаб объекта
                             boxHelper.rotation.setFromRotationMatrix(node.matrixWorld); // Учитываем вращение объекта
-                            boxHelper.visible = false;
+                            //boxHelper.visible = false;
                             // Добавляем BoxHelper в сцену
                             scene.add(boxHelper);
 
@@ -975,6 +975,8 @@
                     continue;
                 if (child.name === "boxHelper_Body45_2")
                     continue;
+                    if (child.name === "boxHelper_wall_and_ceillings")
+                    continue;
                 if (child instanceof THREE.BoxHelper) {
                     const box = new THREE.Box3().setFromObject(child.object);
                     const personBox = new THREE.Box3(
@@ -1012,7 +1014,7 @@
             let wallAndCeilingsBox = null;
 
             for (const child of scene.children) {
-                if (child.name === "boxHelper_Body45" && child instanceof THREE.BoxHelper) {
+                if ((child.name === "boxHelper_Body45" || child.name == "boxHelper_wall_and_ceillings") && child instanceof THREE.BoxHelper) {
                     wallAndCeilingsBox = new THREE.Box3().setFromObject(child.object);
                     break;
                 }
