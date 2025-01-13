@@ -201,9 +201,9 @@
         /* const ambientLight = new THREE.AmbientLight(0xffffff, 4);
          scene.add(ambientLight);*/
 
-       /*  const pointLight = new THREE.PointLight(0xffffff, 3, 10);
-         const cameraPosition = camera.position;  // Позиция камеры
- */
+        /*  const pointLight = new THREE.PointLight(0xffffff, 3, 10);
+          const cameraPosition = camera.position;  // Позиция камеры
+  */
         // Вычисляем вектор вперед от камеры
         /* const cameraDirection = new THREE.Vector3(0, 0, -1);  // Направление взгляда камеры
          camera.getWorldDirection(cameraDirection);  // Обновляем вектор направления
@@ -344,16 +344,53 @@
         const loaderCollada = new ColladaLoader();
         const loaderFBX = new FBXLoader();
         const loaderGLTF = new GLTFLoader();
+
+        function checkTexture(material, objectName) {
+  if (material.map) {
+    console.log(`Текстура для объекта ${objectName}:`, material.map);
+
+    // Проверка параметров текстуры
+    if (!material.map.image) {
+      console.warn(`Текстура для объекта ${objectName} ещё не загружена.`);
+    } else {
+      console.log(
+        `Размер текстуры для объекта ${objectName}: ${material.map.image.width}x${material.map.image.height}`
+      );
+      if (
+        !isPowerOfTwo(material.map.image.width) ||
+        !isPowerOfTwo(material.map.image.height)
+      ) {
+        console.warn(
+          `Текстура для объекта ${objectName} имеет некорректный размер (не степень двойки).`
+        );
+      }
+    }
+  } else {
+    console.log(`Объект ${objectName} не использует текстуру.`);
+  }
+}
+
+// Функция для проверки, является ли число степенью двойки
+function isPowerOfTwo(value) {
+  return (value & (value - 1)) === 0;
+}
+
         function init() {
 
+
+            /* loaderGLTF.load('flat_1C1.glb', // Путь к вашему файлу
+                 function (gltf) {
+ 
+                     scene.add(gltf.scene);
+                 });*/
             // loaderCollada.load('flat_1C1.dae', // Путь к вашему файлу
             //loaderFBX.load('flat_1C1.fbx', // Путь к вашему файлу
-            loaderGLTF.load('FLAT_DEMO.glb', // Путь к вашему файлу
+            loaderGLTF.load('flat_1C1.glb', // Путь к вашему файлу
                 function (gltf) {
-
+                   
                     scene.add(gltf.scene);
                     console.log('Модель успешно загружена:', gltf);
-
+                    
 
                     // Проходим по всем материалам в загруженной модели
                     /* scene.traverse(function (child) {
@@ -389,7 +426,17 @@
 
                         if (node.isMesh && node.material) {
                             const material = node.material;
-
+                            console.log(`Объект: ${node.name}`);
+        
+        
+        if (Array.isArray(material)) {
+          material.forEach((mat, index) => {
+            console.log(`Материал [${index}] для объекта ${node.name}:`, mat);
+            checkTexture(mat, node.name);
+          });
+        } else {
+          checkTexture(material, node.name);
+        }
                             // console.log("материалы", node.material); // Проверяем материалы
                             //console.log("карту шероховатости", node.material.roughnessMap);
                             /* if (material && material.isMeshStandardMaterial) {
@@ -509,7 +556,7 @@
 
 
                     checkMirror();
-                     setupPostProcessing();
+                    setupPostProcessing();
                     animate();
                 },
                 function (xhr) {
@@ -1419,9 +1466,9 @@
                  }
              });*/
 
-           // renderer.render(scene, camera);
+            // renderer.render(scene, camera);
 
-             composer.render();
+            composer.render();
             // Рендер сцены для карты (вид сверху)
             // mapRenderer.render(scene, mapCamera);
             stats.end(); // Конец измерения производительности
