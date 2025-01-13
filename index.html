@@ -4,1478 +4,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer</title>
+    <title>3D Viewer Babylon.js</title>
     <style>
         #3d-viewer {
             cursor: grab;
-            position: absolute;
-            z-index: 99;
+            position: relative;
             width: 100%;
-            height: 100%;
+            height: 80vh;
             overflow: hidden;
-            touch-action: none;
-            /* Отключаем стандартное поведение касания */
-            -webkit-tap-highlight-color: transparent;
-            /* Убирает синий эффект */
-            outline: none;
         }
 
-        #3d-viewer canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            user-select: none;
-            /* Отключаем выделение */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            -khtml-user-select: none;
-            -webkit-touch-callout: none;
-            /* Отключаем вызовы в Android и iOS */
-        }
-
-        /* .cursor-pointer {
+        .cursor-pointer {
             cursor: pointer;
         }
 
         .cursor-clicking {
             cursor: grabbing;
-        }*/
+        }
     </style>
 </head>
 
 <body>
-    <div id="3d-viewer" style="width: 100%; height: 97vh;"></div>
-    <script src="https://cdn.jsdelivr.net/npm/threejs-utils@0.1.3/lib/stats.min.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/environments/RoomEnvironment.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/loaders/EXRLoader.js"></script>
-  
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.145.0/examples/js/shaders/LuminosityHighPassShader.js"></script> -->
-    <!-- <script src="js/controls.js"></script>
-    <script src="js/controlstouch.js"></script>
-    <script src="js/controlskeyboard.js"></script>
-    <script src="js/debug.js"></script> -->
+    <canvas id="3d-viewer" style="width: 100%; height: 80vh;"></canvas>
 
-    <script type="importmap">
-        {
-          "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
-          }
-        }
-      </script>
+    <label>
+        Загрузить GLB
+        <input type="file" id="fileInput" accept=".glb" />
+    </label>
 
-    <script type="module">
-        import * as THREE from 'three';
+    <label>
+        Загрузить HDRI
+        <input type="file" id="hdriInput" accept=".hdr,.exr" />
+    </label>
 
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
-        import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-        import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-        import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/postprocessing/RenderPass.js';
-        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { Reflector } from 'three/addons/objects/Reflector.js';
-        import { DebugEnvironment } from 'three/addons/environments/DebugEnvironment.js';
-        import { RGBELoader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/RGBELoader.js';
-        import { FXAAShader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/shaders/FXAAShader.js';
-        import * as BufferGeometryUtils from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/utils/BufferGeometryUtils.js';
-        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-        import { ColladaLoader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/ColladaLoader.js';
-        import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/FBXLoader.js';
-        import { SSAOPass } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/postprocessing/SSAOPass.js';
-        //import { EffectPass } from 'https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/postprocessing.esm.js';
+    <script>
 
-        import { Sky } from 'three/addons/objects/Sky.js';
+        // import * as BABYLON from 'https://cdn.jsdelivr.net/npm/babylonjs@6.18.0/index.min.js';
+        // import 'https://cdn.jsdelivr.net/npm/babylonjs-loaders@6.18.0/index.min.js';
 
+        // Инициализация сцены
+        var canvas = document.getElementById("3d-viewer");
+        var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, antialiasing: true });
+        var scene = new BABYLON.Scene(engine);
 
+        const camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(-2, 1.5, 1), scene);
+        camera.setTarget(new BABYLON.Vector3(-3, 1.5, 1)); // Точка, на которую смотрит камера
+        camera.minZ = 0.1;
+        // Устанавливаем радиус коллизий камеры
+        camera.checkCollisions = true;
+        camera.collisionsEnabled = true;
+        camera.radius = 0.1;  // Радиус столкновения камеры
 
+        // Включаем коллизии для объектов на сцене
+        scene.collisionsEnabled = true;
+        // Закрепляем управление на холсте
+        camera.attachControl(canvas, true);
 
-        //import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+        // Ограничение высоты камеры
+        scene.onBeforeRenderObservable.add(() => {
+            if (camera.position.y < 1.5) {
+                camera.position.y = 1.5; // Минимальная высота
+            }
+            if (camera.position.y > 1.5) {
+                camera.position.y = 1.5; // Максимальная высота (фиксируем на уровне 1.5)
+            }
+        });
 
-        var scene = new THREE.Scene();
-
-        var container = document.getElementById('3d-viewer');
-        var renderWidth = container.clientWidth;
-        var renderHeight = container.clientHeight;
-
-        var camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 200);
-        var cameraHeight = 1.5;
-        camera.position.set(1, cameraHeight, 1);
-        camera.lookAt(3, cameraHeight, 1);
-
-
-
-
-        scene.add(camera);
-
-        var renderer = new THREE.WebGLRenderer(/*{ antialias: true, preserveDrawingBuffer: true,alpha: true }*/);
-
-        renderer.setSize(renderWidth, renderHeight);
-        renderer.setPixelRatio(1);
-        renderer.domElement.style.width = '100%';
-        renderer.domElement.style.height = '100%';
-        renderer.domElement.style.imageRendering = 'auto';
-        container.appendChild(renderer.domElement);
-
-        var size = new THREE.Vector2();
-        renderer.getSize(size);
-        console.log('devicePixelRatio:', window.devicePixelRatio);
-        console.log('Текущая ширина рендера:', size.width);
-        console.log('Текущая высота рендера:', size.height);
-
-        renderer.shadowMap.enabled = true; // Включаем карту теней
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Настройка типа теней (мягкие)
-        // Установите начальное значение экспозиции
-
-        renderer.physicallyCorrectLights = true;
-        renderer.outputEncoding = THREE.sRGBEncoding;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        //renderer.toneMapping = THREE.ReinhardToneMapping;
-        renderer.toneMappingExposure = 0.5;
-        renderer.debug.checkShaderErrors = true;
-
-        /*   const pmremGenerator = new THREE.PMREMGenerator(renderer);
-           pmremGenerator.compileEquirectangularShader();
-           const environment = new RoomEnvironment();
-           var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
-           scene.environment = defaultEnvMap;*/
-
-        var stats = new Stats();
-        stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
-        document.body.appendChild(stats.dom);
-        const params = {
-
-            exposure: 1
-        };
-        const gui = new GUI();
-
-        const toneMappingFolder = gui.addFolder('tone mapping');
-
-        toneMappingFolder.add(params, 'exposure', 0.1, 2).onChange(function (value) {
-
-            renderer.toneMappingExposure = Math.pow(value, 4.0);
-            // render();
+        const ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
+            ssaoRatio: 0.5,       // Коэффициент разрешения SSAO
+            blurRatio: 0.5        // Коэффициент разрешения размытия
 
         });
-        /*    const sky = new Sky();
-     sky.scale.setScalar(450000); // Размер неба
-     scene.add(sky);
-     
-     // Параметры неба
-     const skyParams = {
-         turbidity: 10, // Мутность
-         rayleigh: 2,   // Рассеивание
-         mieCoefficient: 0.005, // Коэффициент Ми
-         mieDirectionalG: 0.8, // Анизотропия Ми
-         elevation: 20, // Угол высоты солнца
-         azimuth: 180   // Азимут солнца
-     };
-     
-     // Обновление материала Sky
-     function updateSky() {
-         const sun = new THREE.Vector3();
-         const phi = THREE.MathUtils.degToRad(90 - skyParams.elevation);
-         const theta = THREE.MathUtils.degToRad(skyParams.azimuth);
-     
-         sun.setFromSphericalCoords(1, phi, theta);
-         sky.material.uniforms['sunPosition'].value.copy(sun);
-     }
-     updateSky();
-     */
-        // Источник света
-        /*   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-           scene.add(directionalLight);*/
 
-        // Добавляем окружающий свет
-        /* const ambientLight = new THREE.AmbientLight(0xffffff, 4);
-         scene.add(ambientLight);*/
+        ssaoPipeline.expensiveBlur = true;       // Более качественное размытие
+        ssaoPipeline.samples = 16;              // Количество выборок для AO
+        ssaoPipeline.maxZ = 100;                // Максимальная глубина AO
 
-        /*  const pointLight = new THREE.PointLight(0xffffff, 3, 10);
-          const cameraPosition = camera.position;  // Позиция камеры
-  */
-        // Вычисляем вектор вперед от камеры
-        /* const cameraDirection = new THREE.Vector3(0, 0, -1);  // Направление взгляда камеры
-         camera.getWorldDirection(cameraDirection);  // Обновляем вектор направления
-         pointLight.position.copy(cameraPosition).add(cameraDirection.multiplyScalar(3));
-         pointLight.castShadow = true;  // Включаем отбрасывание теней
-         pointLight.shadow.bias = -0.005;*/
+        // Привязка SSAO к камере
+        scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
+        const fxaa = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
+        // Настройка параметров SSAO
+        ssaoPipeline.radius = 2;                 // Радиус выборки AO
+        ssaoPipeline.totalStrength = 1.5;       // Интенсивность AO
+        ssaoPipeline.base = 0.5;
+
+        // Включаем управление клавиатурой
+        camera.keysUp.push(87);    // W - вперед
+        camera.keysDown.push(83);  // S - назад
+        camera.keysLeft.push(65);  // A - влево
+        camera.keysRight.push(68); // D - вправо
+
+        // Настраиваем скорость передвижения
+        camera.speed = 0.1;
+
+        // Добавление света
+        var light2 = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scene);
+        light2.intensity = 0.7;
 
 
+        // Создание света
+        // const light = new BABYLON.DirectionalLight("light", new BABYLON.Vector3(-1, -2, -1), scene);
+        //light.position = new BABYLON.Vector3(10, 10, 0);
+        // Включение теней
+        /*   light.shadowMinZ = 1;
+           light.shadowMaxZ = 1000;
+          const shadowGenerator = new BABYLON.ShadowGenerator(1024, light);*/
 
-
-
-
-
-
-        // Создаем камеру для карты (вид сверху)
-        /*    const mapCamera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 100);
-            mapCamera.position.set(0, 2.5, 0); // Камера расположена высоко и смотрит вниз
-            mapCamera.layers.enable(1);
-            mapCamera.lookAt(0, 0, 0); // Смотрит на центр сцены
-    
-            // Создаем рендер для миникарты
-            const mapRenderer = new THREE.WebGLRenderer({ }); // Используйте alpha, если хотите видеть прозрачный фон
-            mapRenderer.setSize(250, 250); // Размер карты
-            mapRenderer.domElement.style.position = 'absolute'; // Позиционирование миникарты
-            mapRenderer.domElement.style.top = '10px'; // Расположение снизу
-            mapRenderer.domElement.style.left = '10px'; // Расположение слева
-            mapRenderer.domElement.style.pointerEvents = 'none'; // Отключаем взаимодействие с миникартой
-            container.appendChild(mapRenderer.domElement); // Добавляем миникарту в контейнер
-            */
-
-        // Создаем материал для круга
-        /* const circleMaterial1 = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // 
+        // Создание пола, чтобы увидеть тени
+        //const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 10, height: 10 }, scene);
+        // ground.receiveShadows = true; // Пол также будет принимать тени
+        // Загрузка HDRI текстуры по умолчанию
+         const hdrTexture = new BABYLON.HDRCubeTexture("envMap.hdr", scene, 512);
  
-         // Создаем геометрию круга
-         const circleGeometry1 = new THREE.CircleGeometry(0.2, 32); // Радиус 0.1, 32 сегмента
+         // Устанавливаем как карту окружения
+         scene.environmentTexture = hdrTexture;
+         scene.createDefaultSkybox(hdrTexture, true, 1000, 0.3); // Skybox
  
-         // Создаем меш круга
-         const circleMesh = new THREE.Mesh(circleGeometry1, circleMaterial1);
-         circleMesh.position.set(camera.position.x, 0.1, camera.position.z); // Устанавливаем позицию на месте камеры
-         circleMesh.rotation.x = -Math.PI / 2; // Поворачиваем круг, чтобы он был горизонтально
-         circleMesh.layers.set(1);*/
-        // Добавляем круг в сцену
-        // scene.add(circleMesh);
-        camera.layers.enableAll();
-
-        // Функция для обновления положения маркера на карте
-        function updateCameraMarker() {
-            mapCamera.position.set(camera.position.x, 2.5, camera.position.z);
-            circleMesh.position.set(camera.position.x, 0.1, camera.position.z);
-        }
-
-
-        var raycaster = new THREE.Raycaster();
-        var mouse = new THREE.Vector2();
-
-        var canvas = document.createElement('canvas');
-        canvas.width = 256;
-        canvas.height = 256;
-        var context = canvas.getContext('2d');
-        context.fillStyle = 'rgba(255, 255, 255, 0)';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        context.beginPath();
-        context.arc(128, 128, 128, 0, Math.PI * 2);
-        context.arc(128, 128, 110, 0, Math.PI * 2, true);
-        context.closePath();
-        context.fillStyle = 'rgba(255, 255, 255, 1)';
-        context.fill();
-
-        // Создание круга (должно выполняться один раз)
-        const innerRadius = 0.08; // Внутренний радиус, который задает пустоту
-        const outerRadius = 0.1;  // Внешний радиус
-        const circleGeometry = new THREE.RingGeometry(innerRadius, outerRadius, 32); // Радиус 0.1
-        const circleMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            side: THREE.DoubleSide,
-            depthTest: false // Отключаем тестирование на глубину
-        });
-        const circle = new THREE.Mesh(circleGeometry, circleMaterial);
-        // Устанавливаем высокий приоритет рендеринга для круга
-        circle.renderOrder = 9999;
-        scene.add(circle); // Добавляем круг на сцену
-
-        var isMouseDown = false;
-        var mouseX = 0;
-        var mouseY = 0;
-        var prevMouseX = 0;
-        var prevMouseY = 0;
-        var mouseDownTime = 0;
-        var mouseMoved = false;
-        var touchStartX = 0;
-        var touchStartY = 0;
-
-
-
-
-
-
-        let currentCameraQuaternion = camera.quaternion.clone();  // Текущее состояние кватерниона камеры
-
-        // Начальная ориентация камеры
-        let isAnimating = false;
-        let yaw = 0;
-        let pitch = 0;
-        var cameraRotation = new THREE.Euler().setFromQuaternion(camera.quaternion, 'XYZ');
-        yaw = cameraRotation.y;
-        pitch = cameraRotation.x;
-        // Переменные для визуализации raycast
-
-        const rayLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Красный цвет для линии
-        const rayLineGeometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(0, 0, 0),  // Начальная точка
-            new THREE.Vector3(0, 0, 0)   // Конечная точка
-        ]);
-
-        /* const clickMarkerGeometry = new THREE.SphereGeometry(0.1, 32, 32); // Сфера диаметром 0.1
-         const clickMarkerMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Синий цвет
-         let clickMarker = new THREE.Mesh(clickMarkerGeometry, clickMarkerMaterial);
-         scene.add(clickMarker); // Добавляем в сцену*/
-
-        // Создаем линию и добавляем ее в сцену
-        let rayLine = new THREE.Line(rayLineGeometry, rayLineMaterial);
-        scene.add(rayLine);
-
-
-
-        const bloomLayer = new THREE.Layers(); // Для блума
-
-
-
-        function removeNode(node) {
-            const parent = node.parent;
-            if (parent) {
-                parent.remove(node);
-            } else {
-                // Handle case where node is not attached to a parent
-            }
-        }
-        const loaderCollada = new ColladaLoader();
-        const loaderFBX = new FBXLoader();
-        const loaderGLTF = new GLTFLoader();
-
-        function checkTexture(material, objectName) {
-  if (material.map) {
-    console.log(`Текстура для объекта ${objectName}:`, material.map);
-
-    // Проверка параметров текстуры
-    if (!material.map.image) {
-      console.warn(`Текстура для объекта ${objectName} ещё не загружена.`);
-    } else {
-      console.log(
-        `Размер текстуры для объекта ${objectName}: ${material.map.image.width}x${material.map.image.height}`
-      );
-      if (
-        !isPowerOfTwo(material.map.image.width) ||
-        !isPowerOfTwo(material.map.image.height)
-      ) {
-        console.warn(
-          `Текстура для объекта ${objectName} имеет некорректный размер (не степень двойки).`
-        );
-      }
-    }
-  } else {
-    console.log(`Объект ${objectName} не использует текстуру.`);
-  }
-}
-
-// Функция для проверки, является ли число степенью двойки
-function isPowerOfTwo(value) {
-  return (value & (value - 1)) === 0;
-}
-
-        function init() {
-
-
-            /* loaderGLTF.load('flat_1C1.glb', // Путь к вашему файлу
-                 function (gltf) {
- 
-                     scene.add(gltf.scene);
-                 });*/
-            // loaderCollada.load('flat_1C1.dae', // Путь к вашему файлу
-            //loaderFBX.load('flat_1C1.fbx', // Путь к вашему файлу
-            loaderGLTF.load('flat_1C1.glb', // Путь к вашему файлу
-                function (gltf) {
-                   
-                    scene.add(gltf.scene);
-                    console.log('Модель успешно загружена:', gltf);
-                    
-
-                    // Проходим по всем материалам в загруженной модели
-                    /* scene.traverse(function (child) {
-                         if (child.isMesh && child.material.map) {
-                             console.log('Texture found on', child.name, child.material.map);
- 
-                             // Убедитесь, что текстура правильно загружена и инициализирована
-                             const texture = child.material.map;
-                             if (texture) {
-                                 texture.minFilter = THREE.LinearMipmapLinearFilter; // Устанавливаем фильтрацию мип-карт
-                                 texture.generateMipmaps = true; // Генерируем мип-карты
-                                 texture.needsUpdate = true; // Обновляем текстуру
-                             }
-                         }
-                     });*/
-
-
-                    /* const pmremGenerator = new THREE.PMREMGenerator(renderer);
-                     // Генерируем текстуру окружения
-                     const envMap = pmremGenerator.fromScene(scene).texture;
- 
-                     // Применяем текстуру к основной сцене
-                     scene.environment = envMap;
- 
-                     // Очистка ресурсов
-                     pmremGenerator.dispose();*/
-
-
-                    scene.traverse((node) => {
-                        //console.log("Объект: ", node); // Имя объекта                        
-
-
-
-                        if (node.isMesh && node.material) {
-                            const material = node.material;
-                            console.log(`Объект: ${node.name}`);
-        
-        
-        if (Array.isArray(material)) {
-          material.forEach((mat, index) => {
-            console.log(`Материал [${index}] для объекта ${node.name}:`, mat);
-            checkTexture(mat, node.name);
-          });
-        } else {
-          checkTexture(material, node.name);
-        }
-                            // console.log("материалы", node.material); // Проверяем материалы
-                            //console.log("карту шероховатости", node.material.roughnessMap);
-                            /* if (material && material.isMeshStandardMaterial) {
-                                 console.log(`Материал объекта: ${node.name || 'Безымянный'}`);
- 
-                                 // Металличность
-                                 if (material.metalnessMap) {
-                                     console.log('Текстура металличности:', material.metalnessMap.image);
-                                 } else {
-                                     console.log('Металличность (значение):', material.metalness);
-                                 }
- 
-                                 // Шероховатость
-                                 if (material.roughnessMap) {
-                                     console.log('Текстура шероховатости:', material.roughnessMap.image);
-                                 } else {
-                                     console.log('Шероховатость (значение):', material.roughness);
-                                 }
-                             }*/
-                            node.updateMatrixWorld(true);
-                            /* node.castShadow = true;
-                             node.receiveShadow = true;
-                             if (node.name.toLowerCase().includes("lamp") || node.name.toLowerCase().includes("light")) {
-                                 // Добавляем точечный свет к лампе
-                                 console.log("Найдена лампа:", material.name, node);
-                                 const pointLight = new THREE.PointLight(0xffffff, 3, 10);
-                                 pointLight.position.copy(node.getWorldPosition(new THREE.Vector3()));  // Совмещаем позицию света с лампой
-                                 pointLight.castShadow = true;  // Включаем отбрасывание теней
-                                 pointLight.shadow.bias = -0.005;
-                                 scene.add(pointLight);
-                             }*/
-
-                            // Вычисляем границы объекта в мировых координатах
-                            const boundingBox = new THREE.Box3().setFromObject(node);
-
-                            // Создаем BoxHelper и корректируем его по мировым координатам
-                            const boxHelper = new THREE.BoxHelper(node, 0x0000ff);
-                            boxHelper.name = "boxHelper_" + node.name;
-
-                            // Применяем матрицу трансформации объекта
-                            boxHelper.position.copy(node.getWorldPosition(new THREE.Vector3())); // Переносим BoxHelper в мировую позицию
-                            boxHelper.scale.copy(node.getWorldScale(new THREE.Vector3())); // Учитываем масштаб объекта
-                            boxHelper.rotation.setFromRotationMatrix(node.matrixWorld); // Учитываем вращение объекта
-                            boxHelper.visible = false;
-                            // Добавляем BoxHelper в сцену
-                            scene.add(boxHelper);
-
-                            // console.log("Меш:", node);
-                            // console.log("BoxHelper:", boxHelper);
-                            // console.log("Границы в мировых координатах:", boundingBox.min, boundingBox.max);
-
-                            // Проверяем, есть ли у материала карта эмиссии
-                            // if (material.map) console.log('Base Color Map:', material.map);
-                            /*  if (material.normalMap) console.log('Normal Map:', material.normalMap);
-                              if (material.metalnessMap) console.log('Metallic Map:', material.metalnessMap);
-                              if (material.roughnessMap) console.log('Roughness Map:', material.roughnessMap);
-                              if (material.emissiveMap) console.log('Emissive Map:', material.emissiveMap);*/
-
-                            // Если объект с именем "Cube", то добавляем точечный свет
-                            /* if (node.name === "Hall_lamp1") {
-                                 material.emissiveIntensity = 1;
-                                 //cube = node; // Сохраняем ссылку на куб для дальнейшей работы с ним
-                                 node.layers.enable(bloomLayer); // Включаем слой для блума
-                                 material.emissiveIntensity = 1;
-                                 console.log('Интенсивность эмиссии для Cube установлена в 20');
-                             }*/
-
-                            if (material.emissiveMap) {
-                                console.log('Интенсивность эмиссии:', material.emissiveIntensity, node.name);
-
-                                if (node.material) { // Проверяем, есть ли материал у объекта
-
-                                    console.log("Материал: ", node.material.name); // Название материала
-                                }
-                                // Логируем цвет эмиссии
-                                console.log('Цвет эмиссии:', material.emissive.getHexString());
-
-                            }
-                        }
-                    });
-
-                    // Устанавливаем блум для куба
-                    /*  if (cube) {
-                          addBloomEffect(cube);
-                      }*/
-
-                    // Настроим эффект композиции
-
-
-                    countTriangles(scene);
-
-                    console.log("Все дочерние элементы сцены после :", scene.children);
-
-                    /*  const pmremGenerator = new THREE.PMREMGenerator( renderer );
-                      pmremGenerator.compileCubemapShader();
-                      const envScene = new DebugEnvironment();
-                     var generatedCubeRenderTarget = pmremGenerator.fromScene( envScene );
-                     scene.background = generatedCubeRenderTarget.texture;
-                     scene.environment = generatedCubeRenderTarget.texture;*/
-
-                    //const pmremGenerator = new THREE.PMREMGenerator(renderer);
-                    /* pmremGenerator.compileEquirectangularShader();
-                     const environment = new DebugEnvironment();
-                     var defaultEnvMap = pmremGenerator.fromScene(environment).texture;
-                     scene.environment = defaultEnvMap;*/
-
-
-                    const loader = new RGBELoader();
-                    loader.load('envMap.hdr', (texture) => {
-                        texture.mapping = THREE.EquirectangularReflectionMapping;
-
-                        // Устанавливаем текстуру как окружение и фон
-                        scene.environment = texture;
-                        //scene.background = texture;
-                    });
-
-
-
-                    checkMirror();
-                    setupPostProcessing();
-                    animate();
-                },
-                function (xhr) {
-
-                    // Функция, которая вызывается во время загрузки (для отслеживания прогресса)
-                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-
-                }, // Опциональный колбэк прогресса
-                function (error) {
-                    console.error('Ошибка при загрузке модели:', error);
-                }
-
-
-
-
-            );
-
-        }
-
-
-        function updateWorldMatricesRecursively(object) {
-            object.updateMatrixWorld(true);
-            if (object.parent) {
-                updateWorldMatricesRecursively(object.parent);
-            }
-        }
-
-        function checkMirror() {
-            const nodesToRemove = [];
-            const mirrorsData = [];
-
-            scene.traverse((node) => {
-                if (node.isMesh && node.material) {
-                    const material = node.material;
-
-                    if ((material.name && material.name.toLowerCase().includes("mirror")) ||
-                        (material.metalness >= 0.9 && material.roughness <= 0.1 && material.reflectivity >= 0.8) ||
-                        (material.userData && material.userData.isMirror)) {
-
-                        /*   console.log("Найден объект:", node.name);
-   
-                           // Выводим локальные трансформации
-                           console.log("Local Position:", node.position);
-                           console.log("Local Quaternion:", node.quaternion);
-                           console.log("Local Scale:", node.scale);
-                           console.log("Local Matrix:", node.matrix);
-                           if (node.matrixWorldNeedsUpdate) {
-                               console.log("matrixWorldNeedsUpdate is true for:", node.name);
-                           } else {
-                               console.log("matrixWorldNeedsUpdate is false for:", node.name);
-                           }
-                           updateWorldMatricesRecursively(node);
-                           console.log("World Matrix (после updateWorldMatricesRecursively):", node.matrixWorld);
-   
-                           const worldPosition = new THREE.Vector3();
-                           node.getWorldPosition(worldPosition);
-                           console.log("World Position:", worldPosition);
-   
-                           const worldQuaternion = new THREE.Quaternion();
-                           node.getWorldQuaternion(worldQuaternion);
-                           console.log("World Quaternion:", worldQuaternion);
-   
-                           const worldScale = new THREE.Vector3();
-                           node.getWorldScale(worldScale);
-                           console.log("World Scale:", worldScale);
-   
-                           // Дополнительная проверка: преобразование локальных координат в мировые вручную
-                           const manualWorldPosition = new THREE.Vector3().copy(node.position).applyMatrix4(node.matrixWorld);
-                           console.log("Manual World Position:", manualWorldPosition);
-   */
-
-                        console.log("Найден зеркальный материал:", material.name, node);
-                        // mirrorsToReplace.push(node); // Добавляем меш в массив
-                        const parent = node.parent;
-                        var geometry = node.geometry.clone();
-
-
-                        const planeGeometry = new THREE.PlaneGeometry(0.55, 1.98);
-                        if (node.name === "Cube011") {
-                            geometry = planeGeometry;
-                        }
-                        /* const planeGeometry2 = new THREE.PlaneGeometry(0.2, 0.8);
-                         if (node.name === "Cube053") {
-                             geometry = planeGeometry2;
- 
-                         }*/
-
-                        /* const reflector = new Reflector(geometry, {
-                             clipBias: 0.001, // или подберите оптимальное значение
-                             textureWidth: window.innerWidth * 0.8,
-                             textureHeight: window.innerHeight * 0.8,
-                             color: new THREE.Color(0x7f7f7f),
-                             recursion: 0
-                         });*/
-
-                        // reflector.position.copy(node.getWorldPosition(new THREE.Vector3()));
-                        // reflector.quaternion.copy(node.getWorldQuaternion(new THREE.Quaternion()));
-                        // reflector.scale.copy(node.getWorldScale(new THREE.Vector3()));
-
-                        /*  if (node.name === "Cube011") {
-
-                              reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
-                              // reflector.position.x = reflector.position.z + 1.1;
-                          }*/
-
-                        mirrorsData.push({
-                            node: node,
-                            geometry: geometry,
-                            position: node.getWorldPosition(new THREE.Vector3()),
-                            quaternion: node.getWorldQuaternion(new THREE.Quaternion()),
-                            scale: node.getWorldScale(new THREE.Vector3())
-                        });
-                        //  reflector.position.x = reflector.position.x + 1.1;
-                        //   reflector.position.z = reflector.position.z - 1.1;
-                        //reflector.rotateY(Math.PI / 2); // Math.PI = 180 градусов
-                        //scene.add(reflector);
-                        //parent.remove(node);
-                        //scene.remove(node);
-                        nodesToRemove.push(node);
-                    }
-                }
-
+        // Загрузка GLB файла по умолчанию
+        /*  BABYLON.SceneLoader.Append("./", "untitled.glb", scene, function (scene) {
+              scene.createDefaultCameraOrLight(true, true, true); // Создаем стандартную камеру и свет, если их нет
+          });*/
+
+
+        // Добавление Bloom через DefaultRenderingPipeline
+        const pipeline = new BABYLON.DefaultRenderingPipeline("defaultPipeline", true, scene, [camera]);
+        pipeline.bloomEnabled = true;
+        pipeline.bloomThreshold = 0.6;
+        pipeline.bloomIntensity = 1.2;
+
+        // GlowLayer для выделения светящихся объектов
+        const glowLayer = new BABYLON.GlowLayer("glow", scene);
+        glowLayer.intensity = 0.5;
+
+        // Загрузка GLB модели
+        BABYLON.SceneLoader.ImportMesh("", "./", "flat_1C1.glb", scene, (meshes) => {
+            // Установка свойств для отбрасывания теней
+            meshes.forEach(mesh => {
+                mesh.receiveShadows = true; // Модель будет принимать тени
+                mesh.castShadows = true; // Модель будет отбрасывать тени
+                // Дополнительно: можно настроить материал, если требуется
             });
 
-            for (const mirrorData of mirrorsData) {
-                const reflector = new Reflector(mirrorData.geometry, {
-                    clipBias: 0.001,
-                    textureWidth: 512,
-                    textureHeight: 512,
-                    color: new THREE.Color(0x7f7f7f),
-                    recursion: 1
+            scene.meshes.forEach((mesh) => {
+                //mesh.checkCollisions = true;
+            });
+            // Настраиваем материалы после загрузки
+            scene.meshes.forEach(mesh => {
+                if (mesh.material) {
+                    const material = mesh.material;
+
+                    // Проверяем и добавляем свечение
+                    if (!material.emissiveColor) {
+                        material.emissiveColor = new BABYLON.Color3(1, 1, 0); // Желтое свечение
+                    }
+
+                    // Добавляем меш в GlowLayer
+                    glowLayer.addIncludedOnlyMesh(mesh);
+                }
+            });
+        });
+
+        // Обработчик для загрузки GLB файла
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            var file = event.target.files[0];
+            if (file) {
+                var blobURL = URL.createObjectURL(file);
+
+                // Загрузка через URL
+                BABYLON.SceneLoader.Append("", blobURL, scene, function (scene) {
+                    console.log("GLB файл загружен успешно.");
+                }, null, function (scene, message, exception) {
+                    console.error("Ошибка при загрузке GLB файла:", message, exception);
                 });
-
-                reflector.position.copy(mirrorData.position);
-                reflector.quaternion.copy(mirrorData.quaternion);
-                reflector.scale.copy(mirrorData.scale);
-
-                if (mirrorData.node.name === "Cube011") {
-                    reflector.rotateY(Math.PI / 2);
-                }
-
-                /*  if (mirrorData.node.name === "Cube053") {
-                      reflector.rotateY(Math.PI);
-                      reflector.rotation.y -= 0.37;
-                      reflector.position.y += 0.32;
-                  }*/
-
-                scene.add(reflector);
-                scene.remove(mirrorData.node);
-                mirrorData.node.geometry.dispose();// Освобождаем память
-            }
-
-
-
-
-            for (const node of nodesToRemove) {
-                removeNode(node);
-            }
-
-            /* scene.traverse(function (child) {
-                 if (child instanceof Reflector) {
-                     const mesh = child.parent.children.find(c => c.name === child.name.replace("Reflector", ""));
-                     if (mesh) {
-                         const meshPos = new THREE.Vector3();
-                         mesh.getWorldPosition(meshPos);
-                         const reflectorPos = new THREE.Vector3();
-                         child.getWorldPosition(reflectorPos);
-                         const meshQuat = new THREE.Quaternion();
-                         mesh.getWorldQuaternion(meshQuat);
-                         const reflectorQuat = new THREE.Quaternion();
-                         child.getWorldQuaternion(reflectorQuat);
-                         const meshScale = new THREE.Vector3();
-                         mesh.getWorldScale(meshScale);
-                         const reflectorScale = new THREE.Vector3();
-                         child.getWorldScale(reflectorScale);
- 
-                         console.log("Mesh:", mesh.name);
-                         console.log("Mesh Position:", meshPos);
-                         console.log("Reflector Position:", reflectorPos);
-                         console.log("Mesh Quaternion:", meshQuat);
-                         console.log("Reflector Quaternion:", reflectorQuat);
-                         console.log("Mesh Scale:", meshScale);
-                         console.log("Reflector Scale:", reflectorScale);
- 
-                         const boxHelperMesh = new THREE.BoxHelper(mesh, 0xff0000); // Красный
-                         const boxHelperReflector = new THREE.BoxHelper(child, 0x00ff00); // Зеленый
-                         scene.add(boxHelperMesh);
-                         scene.add(boxHelperReflector);
-                     }
-                 }
-             });*/
-        }
-
-
-
-        let cube, bloomPass;
-
-        // Создаем render target для постобработки с сглаживанием
-        const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-            minFilter: THREE.LinearFilter,
-            magFilter: THREE.LinearFilter,
-            format: THREE.RGBFormat,
-            antialias: true // Включаем сглаживание для постобработки
-        });
-
-
-
-
-
-        // Композитор для постобработки
-        let composer = new EffectComposer(renderer/*, renderTarget*/);
-
-        const bloomComposer = new EffectComposer(renderer);
-
-
-        function addBloomEffect(cube) {
-            if (cube) {
-                // Устанавливаем материал для куба с эмиссией
-                cube.material.emissive = new THREE.Color(0xffffff);
-                cube.material.emissiveIntensity = 1.0;
-            }
-        }
-
-
-        const fxaaPass = new ShaderPass(FXAAShader);
-
-        // Настроим постобработку
-        function setupPostProcessing() {
-            // Создаем основной рендер-процесс
-            const renderPass = new RenderPass(scene, camera);
-
-            // Создаем bloom-эффект
-            bloomPass = new UnrealBloomPass(
-                new THREE.Vector2(window.innerWidth, window.innerHeight),
-                1.5, // Интенсивность
-                0.4, // Радиус
-                0.85 // Порог
-            );
-
-            // Создаем пасс для FXAA (сглаживание)
-            /* const fxaaPass = new ShaderPass(FXAAShader);
-             fxaaPass.uniforms['resolution'].value = new THREE.Vector2(1 / window.innerWidth, 1 / window.innerHeight);*/
-
-
-            fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * renderer.getPixelRatio());
-            fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * renderer.getPixelRatio());
-            // Настройка порога сглаживания (threshold) и силы (spread), чтобы увеличить сглаживание
-
-            const outputPass = new OutputPass();
-
-
-            composer.addPass(renderPass);
-            // composer.addPass(bloomPass);
-
-            composer.addPass(outputPass);
-            composer.addPass(fxaaPass);  // Добавляем FXAA для сглаживания
-
-        }
-
-
-        // Обновление позиции камеры
-        function updateCameraPosition() {
-            const speed = 0.02;
-            const direction = new THREE.Vector3();
-
-            // Движение вперед и назад
-            if (keys.ArrowUp || keys.KeyW) {
-                camera.getWorldDirection(direction);
-                if (!checkCollisions(direction.clone().multiplyScalar(speed))) {
-                    camera.position.addScaledVector(direction, speed);
-                }
-            }
-            if (keys.ArrowDown || keys.KeyS) {
-                camera.getWorldDirection(direction);
-                if (!checkCollisions(direction.clone().multiplyScalar(-speed))) {
-                    camera.position.addScaledVector(direction, -speed);
-                }
-            }
-
-            // Движение влево и вправо
-            if (keys.ArrowLeft || keys.KeyA) {
-                camera.getWorldDirection(direction);
-                const left = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
-                if (!checkCollisions(left.clone().multiplyScalar(speed))) {
-                    camera.position.addScaledVector(left, speed);
-                }
-            }
-            if (keys.ArrowRight || keys.KeyD) {
-                camera.getWorldDirection(direction);
-                const right = new THREE.Vector3().crossVectors(direction, camera.up).normalize();
-                if (!checkCollisions(right.clone().multiplyScalar(speed))) {
-                    camera.position.addScaledVector(right, speed);
-                }
-            }
-            camera.position.y = 1.5;
-        }
-
-
-        // Управление камерой через клавиши
-        const keys = {
-            ArrowUp: false,
-            ArrowDown: false,
-            ArrowLeft: false,
-            ArrowRight: false,
-            KeyW: false,
-            KeyA: false,
-            KeyS: false,
-            KeyD: false
-        };
-
-        // Обработчики событий для нажатия и отпускания клавиш
-        document.addEventListener('keydown', (event) => {
-            console.log('devicePixelRatio:', window.devicePixelRatio);
-            if (event.code in keys) {
-                keys[event.code] = true;
             }
         });
 
-        document.addEventListener('keyup', (event) => {
-            if (event.code in keys) {
-                keys[event.code] = false;
+        // Обработчик для загрузки HDRI
+        document.getElementById('hdriInput').addEventListener('change', function (event) {
+            var file = event.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    // Очистка предыдущей текстуры, если необходимо
+                    if (scene.environmentTexture) {
+                        scene.environmentTexture.dispose();
+                    }
+
+                    // Загружаем HDRI текстуру
+                    const newHdrTexture = new BABYLON.HDRCubeTexture(e.target.result, scene, 512);
+
+                    // Применяем HDRI как окружающую среду
+                    scene.createDefaultSkybox(newHdrTexture, true, true, 1);
+
+                    // Обработка события завершения загрузки
+                    newHdrTexture.onLoadObservable.add(() => {
+                        console.log("HDRI текстура загружена успешно");
+                    });
+
+                    // Обработка ошибки загрузки
+                    newHdrTexture.onErrorObservable.add(() => {
+                        console.error("Ошибка загрузки HDRI текстуры");
+                    });
+                };
+                reader.readAsArrayBuffer(file);
             }
         });
 
-        // Создание Raycaster для обнаружения столкновений
-
-        const collisionDistance = 0.5; // Минимальное расстояние до объекта
-        const rayHeightSteps = 5; // Количество проверок по высоте
-        const rayHeightInterval = 0.2; // Интервал между лучами по высоте
-
-        function checkCollisions(direction) {
-            return false;
-            for (let i = 0; i < rayHeightSteps; i++) {
-                // Смещаем положение луча вверх на определенную высоту
-                const rayOrigin = camera.position.clone();
-                rayOrigin.y -= i * rayHeightInterval;
-
-                raycaster.set(rayOrigin, direction.normalize());
-                //const intersects = raycaster.intersectObjects(scene.children, true);
-                var intersects = raycaster.intersectObjects(
-                    scene.children.filter(obj => !(obj instanceof THREE.BoxHelper) && obj !== circle),
-                    true
-                );
-                intersects = intersects.filter(intersect => !(intersect.object instanceof THREE.BoxHelper));
-
-                if (intersects.length > 0 && intersects[0].distance < collisionDistance) {
-                    return true; // Обнаружено столкновение
-                }
-            }
-            return false; // Столкновений нет
-        }
-
-
-        function onMouseMove(event) {
-            // Преобразуем координаты мыши в диапазон [-1, 1]
-            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-            // Обновляем Raycaster
-            raycaster.setFromCamera(mouse, camera);
-
-            // Пересечения с объектами сцены, исключая круг
-            var intersects = raycaster.intersectObjects(
-                scene.children.filter(obj => !(obj instanceof THREE.BoxHelper) && obj !== circle),
-                true
-            );
-            intersects = intersects.filter(intersect => !(intersect.object instanceof THREE.BoxHelper));
-
-            /* if (intersects.length > 0) {
-                 intersects.forEach(intersect => {
-                     console.log("Пересечен объект:", intersect.object);
-                 });
-             } else {
-                 console.log("Пересечений не было.");
-             }*/
-
-            if (intersects.length > 0) {
-                var intersect = intersects[0];
-
-                // Устанавливаем позицию круга на точку пересечения
-                circle.position.copy(intersect.point);
-                const normal = intersect.face.normal.clone(); // Нормаль поверхности
-
-                // Поворачиваем круг в направлении нормали
-                const quaternion = new THREE.Quaternion().setFromUnitVectors(
-                    new THREE.Vector3(0, 0, 1), // Ось нормали по умолчанию
-                    normal.normalize() // Нормаль к поверхности
-                );
-                circle.quaternion.copy(quaternion);
-
-                // Делаем круг видимым
-                circle.visible = true;
-                container.classList.add('cursor-pointer');
-                container.classList.remove('cursor-clicking');
-            } else {
-                // Если нет пересечений, скрываем круг
-                circle.visible = false;
-                container.classList.remove('cursor-pointer');
-            }
-
-            // Устанавливаем флаг перемещения мыши
-            if (isMouseDown) {
-                const distanceMoved = Math.sqrt(
-                    Math.pow(event.clientX - lastMousePosition.x, 2) +
-                    Math.pow(event.clientY - lastMousePosition.y, 2)
-                );
-
-                if (distanceMoved > MOVE_THRESHOLD) {
-                    mouseMoved = true; // Устанавливаем флаг только если перемещение больше порога
-                }
-            }
-
-            lastMousePosition.x = event.clientX; // Обновляем последнюю позицию
-            lastMousePosition.y = event.clientY;
-        }
-
-        function onMouseDown(event) {
-            if (event.button === 0) {
-                mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-                mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-                lastMousePosition.x = event.clientX; // Сохраняем начальную позицию мыши
-                lastMousePosition.y = event.clientY;
-
-                mouseX = event.clientX;
-                mouseY = event.clientY;
-                prevMouseX = event.clientX;
-                prevMouseY = event.clientY;
-                isMouseDown = true;
-                mouseDownTime = performance.now();
-                mouseMoved = false;
-                container.classList.add('cursor-clicking');
-            }
-        }
-
-        function onMouseUp(event) {
-            if (event.button === 0) {
-                isMouseDown = false;
-                container.classList.remove('cursor-clicking');
-
-                var mouseUpTime = performance.now();
-                var timeDiff = mouseUpTime - mouseDownTime;
-                // console.log('клик:', timeDiff, mouseMoved);
-                if (!mouseMoved) {
-                    onClick(event); // Вызываем onClick только если мышь не двигалась
-                }
-            }
-        }
-
-        let lastMousePosition = { x: 0, y: 0 }; // Для хранения последней позиции мыши
-        const MOVE_THRESHOLD = 5; // Пороговое значение для перемещения мыши (в пикселях)
-
-        // Параметры "человека"
-        const personHeight = 1;
-        const personRadius = 0.2; // Примерный радиус для проверки столкновений
-
-        // Функция для проверки столкновения с BoxHelper
-        function isColliding(position, log = false) {
-
-            for (const child of scene.children) {
-                if (child.name === "boxHelper_outer_walls")
-                    continue;
-                if (child.name === "boxHelper_Body45")
-                    continue;
-                if (child.name === "boxHelper_Body45_2")
-                    continue;
-                if (child.name === "boxHelper_wall_and_ceillings")
-                    continue;
-                if (child.name === "boxHelper_ceillings")
-                    continue;
-                if (child.name === "boxHelper_walls")
-                    continue;
-                if (child.name === "boxHelper_marble_bath")
-                    continue;
-
-
-                if (child instanceof THREE.BoxHelper) {
-                    const box = new THREE.Box3().setFromObject(child.object);
-                    const personBox = new THREE.Box3(
-                        new THREE.Vector3(position.x - personRadius, 0.2, position.z - personRadius),
-                        new THREE.Vector3(position.x + personRadius, 1.5, position.z + personRadius)
-                    );
-                    if (box.intersectsBox(personBox)) {
-                        if (log) {
-                            console.log("Столкновение ", child);
-                            console.log("Столкновение ", personBox);
-                        }
-
-                        return true; // Столкновение есть
-                    }
-                }
-            }
-            return false; // Столкновения нет
-        }
-
-
-        let calculatedPoints = [];
-
-        // Функция для очистки всех предыдущих точек
-        function clearCalculatedPoints() {
-            calculatedPoints.forEach(point => {
-                scene.remove(point); // Удаляем точку из сцены
-                point.geometry.dispose(); // Освобождаем память геометрии
-                point.material.dispose(); // Освобождаем память материала
-            });
-            calculatedPoints = []; // Очищаем массив
-        }
-
-        // Функция для поиска безопасной точки рядом с целевой
-        function findSafePosition(targetPosition, searchRadius = 0.5) {
-            let wallAndCeilingsBox = null;
-
-            for (const child of scene.children) {
-                if ((child.name === "boxHelper_Body45" || child.name == "boxHelper_wall_and_ceillings" || child.name == "boxHelper_walls") && child instanceof THREE.BoxHelper) {
-                    wallAndCeilingsBox = new THREE.Box3().setFromObject(child.object);
-                    break;
-                }
-            }
-
-            if (!wallAndCeilingsBox) {
-                console.error("boxHelper_wall_and_ceillings не найден!");
-                return null;
-            }
-
-            let closestSafePosition = null;
-            let closestDistance = Infinity;
-
-            const numChecks = 32;
-            const raycaster = new THREE.Raycaster(); // Создаем Raycaster один раз
-
-            // Предварительная подготовка: материал и геометрия для точек
-            const visibleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Зеленый - для видимых точек
-            const blockedMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Красный - для невидимых точек
-            const blocked2Material = new THREE.MeshBasicMaterial({ color: 0xfff000 }); // Красный - для невидимых точек
-            const sphereGeometry = new THREE.SphereGeometry(0.05, 16, 16); // Радиус 0.1, сегменты 16
-
-            clearCalculatedPoints(); // Очистка перед новым расчетом
-
-            for (let i = 0; i < numChecks; i++) {
-                const angle = (i / numChecks) * Math.PI * 2;
-                const checkPosition = new THREE.Vector3(
-                    targetPosition.x + searchRadius * Math.cos(angle),
-                    cameraHeight, // Устанавливаем корректную высоту
-                    targetPosition.z + searchRadius * Math.sin(angle)
-                );
-
-                if (checkPosition.distanceTo(camera.position) < 0.5) continue;
-                let materialToUse;
-
-                if (wallAndCeilingsBox.containsPoint(checkPosition)) {
-                    if (!isColliding(checkPosition, true)) {
-                        // Проверка видимости с помощью Raycasting
-                        const direction = checkPosition.clone().sub(camera.position).normalize();
-                        raycaster.set(camera.position, direction);
-
-                        var intersects = raycaster.intersectObjects(
-                            scene.children.filter(obj => !(obj instanceof THREE.BoxHelper) && obj !== circle && obj !== scene.getObjectByName("Body45") && obj !== scene.getObjectByName("Body45_2")),
-                            true
-                        );
-
-                        let materialToUse;
-
-                        if (intersects.length === 0 || intersects[0].distance > checkPosition.distanceTo(camera.position)) {
-                            // Точка видна
-                            materialToUse = visibleMaterial;
-                            const distance = targetPosition.distanceTo(checkPosition);
-                            if (distance < closestDistance) {
-                                closestDistance = distance;
-                                closestSafePosition = checkPosition;
-                            }
-                        } else {
-                            // Точка невидима
-                            materialToUse = blockedMaterial;
-                            console.log("Точка не видна из-за:", intersects[0].object);
-                        }
-
-                        // Визуализация точки
-
-                    }
-                    else {
-                        materialToUse = blocked2Material;
-                    }
-                }
-
-
-                /* const pointMesh = new THREE.Mesh(sphereGeometry, materialToUse);
-                 pointMesh.position.copy(checkPosition);
-                 scene.add(pointMesh); // Добавляем точку в сцену
-                 calculatedPoints.push(pointMesh); // Сохраняем ссылку на точку*/
-            }
-
-
-            if (closestSafePosition) {
-                console.log("Найдена ближайшая безопасная и видимая позиция:", closestSafePosition);
-            } else {
-                console.log("В радиусе", searchRadius, "не найдена безопасная и видимая позиция внутри boxHelper_wall_and_ceillings");
-            }
-            return closestSafePosition;
-        }
-
-        function onClick(event) {
-            // Вычисление координат мыши
-            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-
-            raycaster.setFromCamera(mouse, camera);
-            console.log(mouse.x, mouse.y);
-
-            // Обновление линии для визуализации
-            const rayStart = raycaster.ray.origin.clone(); // Начало луча (камера)
-            let rayEnd; // Конец луча
-
-            // Проверка пересечений
-            var intersects = raycaster.intersectObjects(
-                scene.children.filter(obj => !(obj instanceof THREE.BoxHelper) && obj !== circle),
-                true
-            );
-            intersects = intersects.filter(intersect => !(intersect.object instanceof THREE.BoxHelper));
-
-            if (intersects.length > 0) {
-                // Точка пересечения
-                rayEnd = intersects[0].point.clone();
-                // clickMarker.position.copy(rayEnd);
-            } else {
-                // Если пересечений нет, линия до максимальной длины
-                rayEnd = rayStart.clone().add(raycaster.ray.direction.clone().multiplyScalar(100));
-
-            }
-
-            // Обновление геометрии линии
-            // rayLineGeometry.setFromPoints([rayStart, rayEnd]);
-
-            if (intersects.length > 0) {
-                let intersectPoint = intersects[0].point.clone();
-                var clickPoint = intersects[0].point.clone();
-
-                var startPosition = camera.position.clone();
-                var stopDistance = 0.5;
-
-                if (startPosition.distanceTo(intersectPoint) < stopDistance + 0.5) {
-                    console.log("Камера уже достаточно близко. Запускаем анимацию поворота.");
-
-                    animateRotation(clickPoint); // Анимация поворота камеры
-                    return; // Выход из функции, если движение не требуется
-                }
-
-
-                intersectPoint.y = cameraHeight + personHeight / 2; // Учитываем высоту "человека" и ставим центр капсулы
-                if (isColliding(intersectPoint, true)) {
-                    console.log("Целевая точка внутри BoxHelper. Ищем безопасную позицию.");
-                    const safePosition = findSafePosition(intersectPoint);
-                    if (safePosition) {
-                        console.log("Найдена безопасная позиция:", safePosition);
-                        moveToPosition(safePosition);
-                        //animateRotation(clickPoint); 
-                    } else {
-                        console.log("Безопасная позиция не найдена.");
-                        // intersectPoint.y = cameraHeight;
-                        // Обработка ситуации, когда безопасная точка не найдена
-                        animateRotation(clickPoint); // Анимация поворота камеры
-                        return; // Выход из функции, если движение не требуется 
-                    }
-                } else {
-
-
-
-                    moveToPosition(intersectPoint);
-                }
-            } else {
-                console.log('Нет пересечений');
-            }
-        }
-
-        function moveToPosition(targetPosition) {
-            var duration = 1000; // Продолжительность анимации
-            var startPosition = camera.position.clone(); // Начальная позиция камеры
-            var stopDistance = 0.5; // Расстояние, на котором остановится камера           
-
-            var startTime = performance.now(); // Время старта
-
-            function animateMovement() {
-                var elapsedTime = performance.now() - startTime; // Время, прошедшее с начала
-                var t = elapsedTime / duration; // Нормализованное время для анимации
-
-                // Линейная интерполяция позиции камеры
-                if (t < 1) {
-                    camera.position.lerpVectors(startPosition, targetPosition, t);
-
-                    // Проверяем расстояние до целевой позиции
-                    if (camera.position.distanceTo(targetPosition) > stopDistance) {
-                        requestAnimationFrame(animateMovement); // Продолжаем анимацию
-                    }
-                } else {
-                    // Если анимация завершена, но расстояние больше 0.5 метра, устанавливаем конечную позицию
-                    if (camera.position.distanceTo(targetPosition) > stopDistance) {
-                        camera.position.copy(targetPosition);
-                        // camera.lookAt(targetPosition); // Устанавливаем направление взгляда
-                    }
-                }
-            }
-
-            animateMovement();
-        }
-
-
-        function animateRotation(targetPosition) {
-            if (isAnimating) return; // Чтобы предотвратить повторный запуск анимации, если она уже идет
-
-            isAnimating = true;
-
-            var startQuaternion = camera.quaternion.clone(); // Начальная ориентация камеры
-            var targetQuaternion = new THREE.Quaternion(); // Целевая ориентация камеры
-            var duration = 1000; // Продолжительность анимации
-            var startTime = performance.now();
-
-            // Вычисляем целевой поворот для камеры
-            camera.lookAt(targetPosition);
-            targetQuaternion.copy(camera.quaternion);
-            camera.quaternion.copy(startQuaternion); // Возвращаем начальную ориентацию
-
-            function animate() {
-                var elapsedTime = performance.now() - startTime;
-                var t = Math.min(elapsedTime / duration, 1); // Нормализованное время для анимации (0 до 1)
-
-                // Линейная интерполяция кватернионов
-                camera.quaternion.slerpQuaternions(startQuaternion, targetQuaternion, t);
-
-                if (t < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    camera.quaternion.copy(targetQuaternion); // Устанавливаем конечную ориентацию
-                    isAnimating = false; // Завершаем анимацию
-                    currentCameraQuaternion.copy(camera.quaternion); // Сохраняем новую ориентацию камеры
-                    var cameraRotation = new THREE.Euler().setFromQuaternion(currentCameraQuaternion, 'YXZ');
-                    yaw = cameraRotation.y;
-                    pitch = cameraRotation.x;
-                }
-            }
-
-            animate();
-        }
-
-        function onDocumentMouseMove(event) {
-            if (isMouseDown && !isAnimating) {
-                var deltaX = event.clientX - prevMouseX;
-                var deltaY = event.clientY - prevMouseY;
-
-                var sensitivity = 0.002;
-                var maxDelta = 0.1;
-
-                yaw += Math.max(-maxDelta, Math.min(maxDelta, deltaX * sensitivity));
-                pitch += Math.max(-maxDelta, Math.min(maxDelta, deltaY * sensitivity));
-
-                pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
-
-                let smoothedYaw = yaw;
-                let smoothedPitch = pitch;
-                let smoothingFactor = 0.1;
-
-                smoothedYaw = THREE.MathUtils.lerp(smoothedYaw, yaw, smoothingFactor);
-                smoothedPitch = THREE.MathUtils.lerp(smoothedPitch, pitch, smoothingFactor);
-
-
-                var quaternion = new THREE.Quaternion();
-                quaternion.setFromEuler(new THREE.Euler(smoothedPitch, smoothedYaw, 0, 'YXZ'));
-
-                camera.quaternion.copy(quaternion);
-
-                prevMouseX = event.clientX;
-                prevMouseY = event.clientY;
-            }
-        }
-
-        function countTriangles(scene) {
-            let totalTriangles = 0;
-
-            scene.traverse((object) => {
-                //console.log(object.name);
-                //console.log(object.type);
-                if (object.isMesh) { // Проверяем, что объект является мешем
-                    const geometry = object.geometry;
-
-                    if (geometry.index !== null) {
-                        // Считаем треугольники для геометрии с индексом
-                        totalTriangles += geometry.index.count / 3;
-                    } else if (geometry.attributes.position !== undefined) {
-                        // Считаем треугольники для геометрии без индекса
-                        totalTriangles += geometry.attributes.position.count / 3;
-                    }
-                }
-            });
-
-            console.log(`Общее количество треугольников: ${totalTriangles}`);
-            return totalTriangles;
-        }
-
-        function onTouchEnd(event) {
-            if (event.changedTouches.length === 1) {
-                isMouseDown = false;
-                container.classList.remove('cursor-clicking');
-
-                var touchEndTime = performance.now();
-                var timeDiff = touchEndTime - mouseDownTime;
-
-                if (!mouseMoved && timeDiff < 200) {
-                    onClick(event);
-                }
-            }
-        }
-
-        function onTouchStart(event) {
-            if (event.touches.length === 1) {
-
-                var touch = event.touches[0];
-                touchStartX = touch.clientX;
-                touchStartY = touch.clientY;
-                isMouseDown = true;
-                mouseMoved = false;
-                mouseDownTime = performance.now();
-                container.classList.add('cursor-clicking');
-                //event.preventDefault();
-            }
-        }
-
-        function onTouchMove(event) {
-            if (event.touches.length === 1 && isMouseDown) {
-
-                var touch = event.touches[0];
-                var deltaX = touch.clientX - touchStartX;
-                var deltaY = touch.clientY - touchStartY;
-
-                var sensitivity = 0.002;
-
-                yaw += deltaX * sensitivity;
-                pitch += deltaY * sensitivity;
-
-                pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
-
-                var yawQuaternion = new THREE.Quaternion();
-                yawQuaternion.setFromEuler(new THREE.Euler(0, yaw, 0, 'XYZ'));
-
-                var pitchQuaternion = new THREE.Quaternion();
-                pitchQuaternion.setFromEuler(new THREE.Euler(pitch, 0, 0, 'XYZ'));
-
-                camera.quaternion.copy(yawQuaternion);
-                camera.quaternion.multiply(pitchQuaternion);
-
-                touchStartX = touch.clientX;
-                touchStartY = touch.clientY;
-
-                mouseMoved = true;
-                event.preventDefault();
-            }
-        }
-
-
-        document.getElementById('3d-viewer').addEventListener('mousemove', onMouseMove);
-        document.getElementById('3d-viewer').addEventListener('mousedown', onMouseDown);
-        document.addEventListener('mouseup', onMouseUp);
-        document.addEventListener('mousemove', onDocumentMouseMove);
-        document.getElementById('3d-viewer').addEventListener('touchstart', onTouchStart);
-        document.getElementById('3d-viewer').addEventListener('touchmove', onTouchMove);
-        document.addEventListener('touchend', onTouchEnd);
-
-        window.addEventListener('resize', function () {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setPixelRatio(1);
-
-            fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * renderer.getPixelRatio());
-            fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * renderer.getPixelRatio());
-
-            // var renderWidth = container.clientWidth ;
-            //var renderHeight = container.clientHeight;
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            composer.setSize(container.clientWidth, container.clientHeight);
-
-
-            renderer.domElement.style.width = '100%';
-            renderer.domElement.style.height = '100%';
-            renderer.domElement.style.imageRendering = 'auto';
-
-
-
-            var size = new THREE.Vector2();
-            renderer.getSize(size);
-            console.log('devicePixelRatio:', window.devicePixelRatio);
-            console.log('Текущая ширина рендера:', size.width);
-            console.log('Текущая высота рендера:', size.height);
+        // Цикл рендера
+        engine.runRenderLoop(function () {
+            scene.render();
         });
 
-        init();
-
-        function animate() {
-            // console.log('Рендер кадра');
-
-            stats.begin(); // Начало измерения производительности
-
-            requestAnimationFrame(animate);
-            updateCameraPosition();
-
-            /* scene.traverse(function (child) {
-                 if (child instanceof Reflector) {
-                     child.matrixWorldNeedsUpdate = true; // Возможно, достаточно этой строки
-                     child.onBeforeRender(renderer, scene, camera);
-                 }
-             });*/
-
-            // renderer.render(scene, camera);
-
-            composer.render();
-            // Рендер сцены для карты (вид сверху)
-            // mapRenderer.render(scene, mapCamera);
-            stats.end(); // Конец измерения производительности
-        }
-
-
-
+        // Изменение размера окна
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
     </script>
 </body>
 
