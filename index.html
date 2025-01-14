@@ -154,7 +154,7 @@
         var stats = new Stats();
         stats.showPanel(0); // 0 показывает FPS, 1 - время рендеринга, 2 - память
         document.body.appendChild(stats.dom);
-        const params = {
+       /* const params = {
 
             exposure: 1
         };
@@ -167,7 +167,7 @@
             renderer.toneMappingExposure = Math.pow(value, 4.0);
             // render();
 
-        });
+        });*/
         /*    const sky = new Sky();
      sky.scale.setScalar(450000); // Размер неба
      scene.add(sky);
@@ -346,34 +346,34 @@
         const loaderGLTF = new GLTFLoader();
 
         function checkTexture(material, objectName) {
-  if (material.map) {
-    console.log(`Текстура для объекта ${objectName}:`, material.map);
+            if (material.map) {
+                console.log(`Текстура для объекта ${objectName}:`, material.map);
 
-    // Проверка параметров текстуры
-    if (!material.map.image) {
-      console.warn(`Текстура для объекта ${objectName} ещё не загружена.`);
-    } else {
-      console.log(
-        `Размер текстуры для объекта ${objectName}: ${material.map.image.width}x${material.map.image.height}`
-      );
-      if (
-        !isPowerOfTwo(material.map.image.width) ||
-        !isPowerOfTwo(material.map.image.height)
-      ) {
-        console.warn(
-          `Текстура для объекта ${objectName} имеет некорректный размер (не степень двойки).`
-        );
-      }
-    }
-  } else {
-    console.log(`Объект ${objectName} не использует текстуру.`);
-  }
-}
+                // Проверка параметров текстуры
+                if (!material.map.image) {
+                    console.warn(`Текстура для объекта ${objectName} ещё не загружена.`);
+                } else {
+                    console.log(
+                        `Размер текстуры для объекта ${objectName}: ${material.map.image.width}x${material.map.image.height}`
+                    );
+                    if (
+                        !isPowerOfTwo(material.map.image.width) ||
+                        !isPowerOfTwo(material.map.image.height)
+                    ) {
+                        console.warn(
+                            `Текстура для объекта ${objectName} имеет некорректный размер (не степень двойки).`
+                        );
+                    }
+                }
+            } else {
+                console.log(`Объект ${objectName} не использует текстуру.`);
+            }
+        }
 
-// Функция для проверки, является ли число степенью двойки
-function isPowerOfTwo(value) {
-  return (value & (value - 1)) === 0;
-}
+        // Функция для проверки, является ли число степенью двойки
+        function isPowerOfTwo(value) {
+            return (value & (value - 1)) === 0;
+        }
 
         function init() {
 
@@ -387,10 +387,10 @@ function isPowerOfTwo(value) {
             //loaderFBX.load('flat_1C1.fbx', // Путь к вашему файлу
             loaderGLTF.load('flat_1C1.glb', // Путь к вашему файлу
                 function (gltf) {
-                   
+
                     scene.add(gltf.scene);
                     console.log('Модель успешно загружена:', gltf);
-                    
+
 
                     // Проходим по всем материалам в загруженной модели
                     /* scene.traverse(function (child) {
@@ -427,16 +427,16 @@ function isPowerOfTwo(value) {
                         if (node.isMesh && node.material) {
                             const material = node.material;
                             console.log(`Объект: ${node.name}`);
-        
-        
-        if (Array.isArray(material)) {
-          material.forEach((mat, index) => {
-            console.log(`Материал [${index}] для объекта ${node.name}:`, mat);
-            checkTexture(mat, node.name);
-          });
-        } else {
-          checkTexture(material, node.name);
-        }
+
+
+                            if (Array.isArray(material)) {
+                                material.forEach((mat, index) => {
+                                    console.log(`Материал [${index}] для объекта ${node.name}:`, mat);
+                                    checkTexture(mat, node.name);
+                                });
+                            } else {
+                                checkTexture(material, node.name);
+                            }
                             // console.log("материалы", node.material); // Проверяем материалы
                             //console.log("карту шероховатости", node.material.roughnessMap);
                             /* if (material && material.isMeshStandardMaterial) {
@@ -555,7 +555,7 @@ function isPowerOfTwo(value) {
 
 
 
-                    //checkMirror();
+                    checkMirror();
                     setupPostProcessing();
                     animate();
                 },
