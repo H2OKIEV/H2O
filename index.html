@@ -105,7 +105,7 @@
         const ssaoFolder = gui.addFolder('SSAO Settings');
 
         // Управляем параметрами через пользовательские действия
-        ssaoFolder.add({ ssaoRatio: 0.5 }, 'ssaoRatio', 0.1, 1).name('SSAO Ratio').onChange(function (value) {
+       /* ssaoFolder.add({ ssaoRatio: 0.5 }, 'ssaoRatio', 0.1, 1).name('SSAO Ratio').onChange(function (value) {
             ssaoPipeline.dispose(); // Удаляем старый пайплайн
             ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
                 ssaoRatio: value, // Обновляем параметр
@@ -125,7 +125,7 @@
             ssaoPipeline.samples = 16;
             ssaoPipeline.expensiveBlur = true;
             scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
-        });
+        });*/
 
         // Добавляем другие параметры напрямую
         ssaoFolder.add(ssaoPipeline, 'samples', 1, 32).name('Samples').onChange(function (value) {
@@ -274,9 +274,13 @@
                     //console.log("Found mirror-like material:", material.name);
                     // Если хотя бы одно условие выполняется
                     if (isMirrorMaterial || isReflectiveMaterial || hasUserDataMirror) {
-                        console.log("Found mirror-like material:", material.name);
+                        console.log("Found mirror-like material:", material.name, mesh.name);
                         // Ваш код для обработки этого материала
-                        applyMirrorEffect(mesh, scene, camera); // Применяем эффект зеркала
+                      //  createCubeMirror(mesh, scene, camera); // Применяем эффект зеркала
+                       // mesh.material = new BABYLON.StandardMaterial("tempMat", scene);
+                        createCubeMirror(mesh, scene, urls).then(texture => {
+                            //Текстура применена
+                        });
                     }
                 }
             });
@@ -339,6 +343,7 @@
                         if (material.name.includes("light")) {
                             const intensity = 2.0; // Уровень интенсивности
                             material.emissiveColor = new BABYLON.Color3(1, 1, 1).scale(intensity);
+
                         }
 
                         //console.log("Emissive Intensity (average):", emissiveIntensity);
@@ -351,6 +356,38 @@
             });
         });
 
+
+        async function createCubeMirror(mesh, scene, urls) {
+            if (urls.length !== 6) {
+                console.error("Требуется 6 URL-адресов для кубической текстуры.");
+                return;
+            }
+
+            // 1. Создаем кубическую текстуру
+            const cubeTexture = new BABYLON.CubeTexture.CreateFromPrefilteredData(urls, scene);
+
+            // 2. Создаем материал
+            const mirrorMaterial = new BABYLON.StandardMaterial("cubeMirrorMaterial_" + mesh.name, scene);
+            mirrorMaterial.reflectionTexture = cubeTexture;
+            mirrorMaterial.roughness = 0.0; // Для зеркального отражения
+            mirrorMaterial.metallic = 1.0; // Для металлического блеска (по желанию)
+            mirrorMaterial.disableLighting = true; // Отключаем стандартное освещение
+
+            // 3. Применяем материал к мешу
+            mesh.material = mirrorMaterial;
+
+            return cubeTexture;
+        }
+
+        // Пример использования:
+        const urls = [
+            "Model/Mirrors/hall_mirror_primitive0/image_px.jpg", // Справа
+            "Model/Mirrors/hall_mirror_primitive0/image_nx.jpg", // Слева
+            "Model/Mirrors/hall_mirror_primitive0/image_py.jpg", // Сверху
+            "Model/Mirrors/hall_mirror_primitive0/image_ny.jpg", // Снизу
+            "Model/Mirrors/hall_mirror_primitive0/image_pz.jpg", // Спереди
+            "Model/Mirrors/hall_mirror_primitive0/image_nz.jpg", // Сзади
+        ];
 
 
 
@@ -621,22 +658,7 @@
             const duration = 1000;
 
             // Плавное движение с помощью tween
-            BABYLON.Animation.CreateAndStartAnimation("moveCamera", camera, "position", 60, duration / 30, startPosition, targetPoint, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-            /*  const animation = BABYLON.Animation.CreateAndStartAnimation(
-                  "moveCamera",
-                  camera,
-                  "position",
-                  60,
-                  duration / 100,
-                  startPosition,
-                  targetPoint,
-                  BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
-              );
-  
-              const easingFunction = new BABYLON.CubicEase();
-  easingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
-  animation.setEasingFunction(easingFunction);*/
+            BABYLON.Animation.CreateAndStartAnimation("moveCamera", camera, "position", 60, duration / 30, startPosition, targetPoint, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);          
 
         }
 
