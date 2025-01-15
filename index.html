@@ -93,16 +93,16 @@
 
         ssaoPipeline.expensiveBlur = true;       // Более качественное размытие
         ssaoPipeline.samples = 16;              // Количество выборок для AO
-        ssaoPipeline.maxZ = 100;                // Максимальная глубина AO
-        ssaoPipeline.radius = 2;                 // Радиус выборки AO
-        ssaoPipeline.totalStrength = 2;       // Интенсивность AO
-        ssaoPipeline.base = 0.5;
+        ssaoPipeline.maxZ = 424;                // Максимальная глубина AO
+        ssaoPipeline.radius = 0.6;                 // Радиус выборки AO
+        ssaoPipeline.totalStrength = 3.9;       // Интенсивность AO
+        ssaoPipeline.base = 0.6;
         scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
 
-        const gui = new dat.GUI();
+      //  const gui = new dat.GUI();
 
         // Создаем папку для SSAO настроек
-        const ssaoFolder = gui.addFolder('SSAO Settings');
+       // const ssaoFolder = gui.addFolder('SSAO Settings');
 
         // Управляем параметрами через пользовательские действия
         /* ssaoFolder.add({ ssaoRatio: 0.5 }, 'ssaoRatio', 0.1, 1).name('SSAO Ratio').onChange(function (value) {
@@ -128,7 +128,7 @@
          });*/
 
         // Добавляем другие параметры напрямую
-        ssaoFolder.add(ssaoPipeline, 'samples', 1, 32).name('Samples').onChange(function (value) {
+      /*  ssaoFolder.add(ssaoPipeline, 'samples', 1, 32).name('Samples').onChange(function (value) {
             ssaoPipeline.samples = Math.floor(value);
         });
 
@@ -149,7 +149,7 @@
         });
 
         // Открываем GUI
-        ssaoFolder.open();
+        ssaoFolder.open();*/
 
 
         // Привязка SSAO к камере
@@ -229,13 +229,14 @@
         currentCircle.collisionMask = 0; // Не сталкивается ни с чем (или можно указать другую группу, если нужно)
         currentCircle.checkCollisions = false;
         var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
-        var fpsTextBlock = new BABYLON.GUI.TextBlock();
+        
+      /*  var fpsTextBlock = new BABYLON.GUI.TextBlock();
         fpsTextBlock.text = "FPS: 0";
         fpsTextBlock.fontSize = 24;
         fpsTextBlock.color = "white";
         fpsTextBlock.top = "10px";
         fpsTextBlock.left = "10px";
-        advancedTexture.addControl(fpsTextBlock);
+        advancedTexture.addControl(fpsTextBlock);*/
 
         // GlowLayer для выделения светящихся объектов
         const glowLayer = new BABYLON.GlowLayer("glow", scene);
@@ -355,6 +356,7 @@
                             (material.emissiveColor.r + material.emissiveColor.g + material.emissiveColor.b) / 3;
 
                         if (material.name.includes("light")) {
+                            console.log("emissiveColor", material.name);
                             const intensity = 2.0; // Уровень интенсивности
                             material.emissiveColor = new BABYLON.Color3(1, 1, 1).scale(intensity);
 
@@ -738,7 +740,7 @@
         // Цикл рендера
         engine.runRenderLoop(function () {
             scene.render();
-            fpsTextBlock.text = "FPS: " + Math.round(engine.getFps());
+           // fpsTextBlock.text = "FPS: " + Math.round(engine.getFps());
         });
 
         // Изменение размера окна
