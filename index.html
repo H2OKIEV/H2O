@@ -105,27 +105,27 @@
         const ssaoFolder = gui.addFolder('SSAO Settings');
 
         // Управляем параметрами через пользовательские действия
-       /* ssaoFolder.add({ ssaoRatio: 0.5 }, 'ssaoRatio', 0.1, 1).name('SSAO Ratio').onChange(function (value) {
-            ssaoPipeline.dispose(); // Удаляем старый пайплайн
-            ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
-                ssaoRatio: value, // Обновляем параметр
-                blurRatio: ssaoPipeline.blurRatio // Сохраняем остальные настройки
-            });
-            ssaoPipeline.samples = 16;
-            ssaoPipeline.expensiveBlur = true;
-            scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
-        });
-
-        ssaoFolder.add({ blurRatio: 0.5 }, 'blurRatio', 0.1, 1).name('Blur Ratio').onChange(function (value) {
-            ssaoPipeline.dispose(); // Удаляем старый пайплайн
-            ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
-                ssaoRatio: ssaoPipeline.ssaoRatio, // Сохраняем остальные настройки
-                blurRatio: value
-            });
-            ssaoPipeline.samples = 16;
-            ssaoPipeline.expensiveBlur = true;
-            scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
-        });*/
+        /* ssaoFolder.add({ ssaoRatio: 0.5 }, 'ssaoRatio', 0.1, 1).name('SSAO Ratio').onChange(function (value) {
+             ssaoPipeline.dispose(); // Удаляем старый пайплайн
+             ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
+                 ssaoRatio: value, // Обновляем параметр
+                 blurRatio: ssaoPipeline.blurRatio // Сохраняем остальные настройки
+             });
+             ssaoPipeline.samples = 16;
+             ssaoPipeline.expensiveBlur = true;
+             scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
+         });
+ 
+         ssaoFolder.add({ blurRatio: 0.5 }, 'blurRatio', 0.1, 1).name('Blur Ratio').onChange(function (value) {
+             ssaoPipeline.dispose(); // Удаляем старый пайплайн
+             ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
+                 ssaoRatio: ssaoPipeline.ssaoRatio, // Сохраняем остальные настройки
+                 blurRatio: value
+             });
+             ssaoPipeline.samples = 16;
+             ssaoPipeline.expensiveBlur = true;
+             scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
+         });*/
 
         // Добавляем другие параметры напрямую
         ssaoFolder.add(ssaoPipeline, 'samples', 1, 32).name('Samples').onChange(function (value) {
@@ -275,12 +275,26 @@
                     // Если хотя бы одно условие выполняется
                     if (isMirrorMaterial || isReflectiveMaterial || hasUserDataMirror) {
                         console.log("Found mirror-like material:", material.name, mesh.name);
+
+                        /* const hdrTexture = new BABYLON.HDRCubeTexture("6_in_ones.exr", scene, 256);
+         // Код, выполняемый после успешной загрузки текстуры
+         console.log("HDR texture loaded successfully!");
+ 
+         const mirrorMaterial = new BABYLON.StandardMaterial("mirrorMaterial", scene);
+         mirrorMaterial.reflectionTexture = hdrTexture;
+         mirrorMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.CUBIC_MODE;
+         mirrorMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+         mirrorMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+         mesh.material = mirrorMaterial;*/
+
+
                         // Ваш код для обработки этого материала
-                      //  createCubeMirror(mesh, scene, camera); // Применяем эффект зеркала
-                       // mesh.material = new BABYLON.StandardMaterial("tempMat", scene);
-                        createCubeMirror(mesh, scene, urls).then(texture => {
-                            //Текстура применена
-                        });
+                        //applyMirrorEffect(mesh, scene, camera); // Применяем эффект зеркала
+                       // applyMirrorEffectToMesh(mesh, scene); // Применяем эффект зеркала
+                        // mesh.material = new BABYLON.StandardMaterial("tempMat", scene);
+                        /* createCubeMirror(mesh, scene, urls).then(texture => {
+                             //Текстура применена
+                         });*/
                     }
                 }
             });
@@ -356,6 +370,64 @@
             });
         });
 
+      /*  function applyMirrorEffectToMesh(mesh, scene) {
+
+            const hdrTexture = new BABYLON.HDRCubeTexture("путь/к/файлу.exr", scene, 256, false, true, true, function () {
+                console.log("HDR texture loaded successfully!"); // Вывод в консоль при успехе
+                // Здесь код для применения материала к мешу
+                const mirrorMaterial = new BABYLON.StandardMaterial("mirrorMaterial", scene);
+                mirrorMaterial.reflectionTexture = hdrTexture;
+                mirrorMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.CUBIC_MODE;
+                mirrorMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+                mirrorMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+                mesh.material = mirrorMaterial;
+
+            }, function (message, exception) {
+                console.error("Error loading HDR texture:", message, exception); // Вывод ошибки в консоль
+                if (exception) {
+                    console.error("Detailed error:", exception); // Дополнительная информация об ошибке
+                }
+            });
+        }*/
+          function applyMirrorEffectToMesh(mesh, scene) {
+  
+             // const hdrTexture = new BABYLON.HDRCubeTexture("Model/Mirrors/hall_mirror_primitive0/6_in_ones.exr", scene, 512);
+           /*   const hdrTexture = new BABYLON.HDRCubeTexture("Model/Mirrors/hall_mirror_primitive0/6_in_ones.exr", scene, 512); // 128 - размер текстуры
+  
+  // Создание материала
+  const mirrorMaterial = new BABYLON.StandardMaterial("mirrorMaterial", scene);
+  mirrorMaterial.reflectionTexture = hdrTexture;
+  mirrorMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE; // Важно для зеркал
+  mirrorMaterial.specularColor = new BABYLON.Color3(0, 0, 0); // Отключаем блики от материала, оставляем только отражения
+  mirrorMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0); // Убираем диффузный цвет
+  
+  // Применение материала к мешу
+  mesh.material = mirrorMaterial;*/
+  //return;
+  
+              // Создаем отражающую текстуру CubeTexture
+              const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 0.5 }, scene);
+
+              const cubeTexture = new BABYLON.CubeTexture("Model/Mirrors/hall_mirror_primitive0/skybox", scene);
+  
+              // Создаем материал для зеркального эффекта
+              const mirrorMaterial = new BABYLON.StandardMaterial("mirrorMaterial", scene);
+              mirrorMaterial.reflectionTexture = cubeTexture;
+             // mirrorMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+              mirrorMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.CUBIC_MODE;
+              mirrorMaterial.specularColor = new BABYLON.Color3(0, 0, 0); // Отключаем блики
+              mirrorMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0); // Отключаем диффузный свет
+  
+              // Применяем материал к переданному мешу
+              mesh.material = mirrorMaterial;
+              skybox.material = mirrorMaterial;
+              
+              skybox.position.x -=1;
+              skybox.position.z +=1;
+              skybox.position.y +=1;
+            //  mesh.scaling = new BABYLON.Vector3(1, 1, 1); // Восстановление масштаба
+             // mirrorMaterial.reflectionTexture.level = 0.5; // Уменьшаем интенсивность
+          }
 
         async function createCubeMirror(mesh, scene, urls) {
             if (urls.length !== 6) {
@@ -393,65 +465,65 @@
 
 
 
-        function applyMirrorEffect(mesh, scene, camera) {
-            // Создаём текстуру зеркала
-            const mirrorTexture = new BABYLON.MirrorTexture("mirrorTexture_" + mesh.name, 1024, scene, true);
-
-            let mirrorPlane;
-
-            if (mesh.getClassName() === "Mesh" && mesh.geometry) { // Проверка, что это Mesh и у него есть геометрия
-                // Попытка получить нормаль на основе геометрии (лучше для плоских поверхностей)
-                mesh.computeWorldMatrix(true);
-                const worldVertices = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-                const worldMatrix = mesh.getWorldMatrix();
-
-                if (worldVertices && worldVertices.length >= 9) {
-                    const p1 = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(worldVertices[0], worldVertices[1], worldVertices[2]), worldMatrix);
-                    const p2 = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(worldVertices[3], worldVertices[4], worldVertices[5]), worldMatrix);
-                    const p3 = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(worldVertices[6], worldVertices[7], worldVertices[8]), worldMatrix);
-
-                    let normal = BABYLON.Vector3.Cross(p2.subtract(p1), p3.subtract(p1)).normalize();
-
-                    if (mesh.name.includes("bath_mirror_primitive0")) {
-                        normal = new BABYLON.Vector3(0, 0, -1);
-                    }
-
-                    mirrorPlane = BABYLON.Plane.FromPositionAndNormal(mesh.getAbsolutePosition(), normal);
-                    console.log("Using geometry-based normal for mirror:", mesh.name); // Отладочное сообщение
-                } else {
-                    console.warn("Mesh has no vertices or not enough vertices to calculate normal. Falling back to default normal.", mesh.name);
-                }
-            }
-
-            if (!mirrorPlane) { // Если не удалось вычислить нормаль по геометрии или это не Mesh
-                // Используем нормаль, направленную вверх (подходит для кругов и других случаев)
-                const normal = BABYLON.Vector3.Up(); // Или BABYLON.Vector3.Forward() или другая, в зависимости от ориентации
-
-
-                mirrorPlane = BABYLON.Plane.FromPositionAndNormal(mesh.getAbsolutePosition(), normal);
-                console.log("Using default normal (Up) for mirror:", mesh.name); // Отладочное сообщение
-            }
-
-            mirrorTexture.mirrorPlane = mirrorPlane;
-
-            // Создаём материал для зеркала
-            const mirrorMaterial = new BABYLON.StandardMaterial("mirrorMaterial_" + mesh.name, scene);
-            mirrorMaterial.reflectionTexture = mirrorTexture;
-            mirrorMaterial.disableLighting = false;
-            mirrorMaterial.reflectionTexture.level = 0.8; // Настройка интенсивности отражения
-            // Применяем материал к объекту
-            mesh.material = mirrorMaterial;
-
-            // Настраиваем, какие объекты будут отражаться
-            mirrorTexture.renderList = scene.meshes.filter((m) => m !== mesh);
-            //mesh.position.x += 0.1; // Немного поднимаем зеркало над поверхностью
-            // mesh.rotation.y = Math.PI; // 180 градусов в радианах
-            // Отладочный вывод
-            console.log("Mirror Plane:", mirrorPlane);
-            console.log("Mirror Plane Normal:", mirrorPlane.normal);
-            console.log("Mirror Plane Distance:", mirrorPlane.d);
-        }
-
+        /*  function applyMirrorEffect(mesh, scene, camera) {
+              // Создаём текстуру зеркала
+              const mirrorTexture = new BABYLON.MirrorTexture("mirrorTexture_" + mesh.name, 2024, scene, true);
+  
+              let mirrorPlane;
+  
+              if (mesh.getClassName() === "Mesh" && mesh.geometry) { // Проверка, что это Mesh и у него есть геометрия
+                  // Попытка получить нормаль на основе геометрии (лучше для плоских поверхностей)
+                  mesh.computeWorldMatrix(true);
+                  const worldVertices = mesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+                  const worldMatrix = mesh.getWorldMatrix();
+  
+                  if (worldVertices && worldVertices.length >= 9) {
+                      const p1 = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(worldVertices[0], worldVertices[1], worldVertices[2]), worldMatrix);
+                      const p2 = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(worldVertices[3], worldVertices[4], worldVertices[5]), worldMatrix);
+                      const p3 = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(worldVertices[6], worldVertices[7], worldVertices[8]), worldMatrix);
+  
+                      let normal = BABYLON.Vector3.Cross(p2.subtract(p1), p3.subtract(p1)).normalize();
+  
+                      if (mesh.name.includes("bath_mirror_primitive0")) {
+                          normal = new BABYLON.Vector3(0, 0, -1);
+                      }
+  
+                      mirrorPlane = BABYLON.Plane.FromPositionAndNormal(mesh.getAbsolutePosition(), normal);
+                      console.log("Using geometry-based normal for mirror:", mesh.name); // Отладочное сообщение
+                  } else {
+                      console.warn("Mesh has no vertices or not enough vertices to calculate normal. Falling back to default normal.", mesh.name);
+                  }
+              }
+  
+              if (!mirrorPlane) { // Если не удалось вычислить нормаль по геометрии или это не Mesh
+                  // Используем нормаль, направленную вверх (подходит для кругов и других случаев)
+                  const normal = BABYLON.Vector3.Up(); // Или BABYLON.Vector3.Forward() или другая, в зависимости от ориентации
+  
+  
+                  mirrorPlane = BABYLON.Plane.FromPositionAndNormal(mesh.getAbsolutePosition(), normal);
+                  console.log("Using default normal (Up) for mirror:", mesh.name); // Отладочное сообщение
+              }
+  
+              mirrorTexture.mirrorPlane = mirrorPlane;
+  
+              // Создаём материал для зеркала
+              const mirrorMaterial = new BABYLON.StandardMaterial("mirrorMaterial_" + mesh.name, scene);
+              mirrorMaterial.reflectionTexture = mirrorTexture;
+              mirrorMaterial.disableLighting = false;
+              mirrorMaterial.reflectionTexture.level = 0.8; // Настройка интенсивности отражения
+              // Применяем материал к объекту
+              mesh.material = mirrorMaterial;
+  
+              // Настраиваем, какие объекты будут отражаться
+              mirrorTexture.renderList = scene.meshes.filter((m) => m !== mesh);
+              //mesh.position.x += 0.1; // Немного поднимаем зеркало над поверхностью
+              // mesh.rotation.y = Math.PI; // 180 градусов в радианах
+              // Отладочный вывод
+              console.log("Mirror Plane:", mirrorPlane);
+              console.log("Mirror Plane Normal:", mirrorPlane.normal);
+              console.log("Mirror Plane Distance:", mirrorPlane.d);
+          }
+  */
 
 
 
@@ -658,7 +730,7 @@
             const duration = 1000;
 
             // Плавное движение с помощью tween
-            BABYLON.Animation.CreateAndStartAnimation("moveCamera", camera, "position", 60, duration / 30, startPosition, targetPoint, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);          
+            BABYLON.Animation.CreateAndStartAnimation("moveCamera", camera, "position", 60, duration / 30, startPosition, targetPoint, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
 
         }
 
