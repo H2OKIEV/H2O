@@ -66,7 +66,7 @@
     <canvas id="3d-viewer" style="width: 100%; height: 80vh;"></canvas>
 
     <button id="open3DTour">Открыть 3D тур</button>
-    <!-- <button id="openDemo">Открыть 3D тур Demo</button> -->
+    <button id="openDemo">Открыть 3D тур Debug</button>
 
     <div id="modal">
         <div id="modalContent">
@@ -88,13 +88,14 @@
         import { start3DTour } from './js/script.js';
         import { stop3DTour } from './js/script.js';
         const open3DTour = document.getElementById('open3DTour');
-       /* const open3DDemo = document.getElementById('openDemo');
+        const open3DDemo = document.getElementById('openDemo');
         // Открытие модального окна
         open3DDemo.addEventListener('click', () => {
             modal.style.display = 'flex';
-            const modelPath = "Model/FLAT_DEMO/FLAT_DEMO.glb";
-            start3DTour(modelPath);
-        });*/
+           // const modelPath = "Model/FLAT_DEMO/FLAT_DEMO.glb";
+            const modelPath = "Model/flat_1C1/flat_1C1.glb";
+            start3DTour(modelPath, true);
+        });
 
         open3DTour.addEventListener('click', () => {
             modal.style.display = 'flex';
