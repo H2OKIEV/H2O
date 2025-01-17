@@ -68,27 +68,27 @@ export function start3DTour(modelPath, debug = false) {
             }
         });
 
-         let ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
-             ssaoRatio: 0.5,       // Коэффициент разрешения SSAO
-             blurRatio: 0.5        // Коэффициент разрешения размытия
- 
-         });
- 
-         ssaoPipeline.expensiveBlur = true;       // Более качественное размытие
-         ssaoPipeline.samples = 16;              // Количество выборок для AO
-         ssaoPipeline.maxZ = 424;                // Максимальная глубина AO
-         ssaoPipeline.radius = 0.6;                 // Радиус выборки AO
-         ssaoPipeline.totalStrength = 3.9;       // Интенсивность AO
-         ssaoPipeline.base = 0.6;
-         scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
+        let ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
+            ssaoRatio: 0.5,       // Коэффициент разрешения SSAO
+            blurRatio: 0.5        // Коэффициент разрешения размытия
+
+        });
+
+        ssaoPipeline.expensiveBlur = true;       // Более качественное размытие
+        ssaoPipeline.samples = 16;              // Количество выборок для AO
+        ssaoPipeline.maxZ = 424;                // Максимальная глубина AO
+        ssaoPipeline.radius = 0.6;                 // Радиус выборки AO
+        ssaoPipeline.totalStrength = 3.9;       // Интенсивность AO
+        ssaoPipeline.base = 0.6;
+        scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
 
         const fxaa = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
 
         // Предполагается, что библиотека SMAA импортирована
-       // const taaRenderPipeline = new BABYLON.TAARenderingPipeline("taa", scene, [camera]);
+        // const taaRenderPipeline = new BABYLON.TAARenderingPipeline("taa", scene, [camera]);
 
-       // taaRenderPipeline.isEnabled = true;
-      //  taaRenderPipeline.samples = 8;
+        // taaRenderPipeline.isEnabled = true;
+        //  taaRenderPipeline.samples = 8;
 
 
         // Включаем управление клавиатурой
@@ -104,10 +104,10 @@ export function start3DTour(modelPath, debug = false) {
         };
 
         // Добавление Bloom через DefaultRenderingPipeline
-          const pipeline = new BABYLON.DefaultRenderingPipeline("defaultPipeline", true, scene, [camera]);
-          pipeline.bloomEnabled = true;
+        const pipeline = new BABYLON.DefaultRenderingPipeline("defaultPipeline", true, scene, [camera]);
+        /* pipeline.bloomEnabled = true;
           pipeline.bloomThreshold = 0.6;
-          pipeline.bloomIntensity = 1.0;
+          pipeline.bloomIntensity = 1.0;*/
 
         // Создаем кольцо (торус)
         currentCircle = BABYLON.MeshBuilder.CreateTorus("ring", {
@@ -131,9 +131,9 @@ export function start3DTour(modelPath, debug = false) {
 
 
         // GlowLayer для выделения светящихся объектов
-         const glowLayer = new BABYLON.GlowLayer("glow", scene);
-         glowLayer.intensity = 0.5;
-         glowLayer.addExcludedMesh(currentCircle);
+        const glowLayer = new BABYLON.GlowLayer("glow", scene);
+        glowLayer.intensity = 0.5;
+        glowLayer.addExcludedMesh(currentCircle);
 
 
         scene.onBeforeRenderObservable.add(() => {
@@ -492,7 +492,7 @@ function loadModel(path, debug = false) {
           });*/
 
         meshes.forEach((mesh) => {
-           // console.log(mesh.name);
+            // console.log(mesh.name);
             if (mesh.name === "walls")
                 return;
             if (mesh.name === "ceillings")
@@ -511,6 +511,31 @@ function loadModel(path, debug = false) {
                 return;
             if (mesh.name === "bath_carpet")
                 return;
+
+          /*  if (mesh.name === "main_room_lamp_primitive0") { // Проверяем, что меш существует
+               
+                // Получаем позицию меша для размещения света
+                const meshPosition = mesh.getAbsolutePosition();
+                console.log("Mesh found:", mesh.name, meshPosition);
+                // Создаем точечный свет (PointLight) в позиции меша
+                const light = new BABYLON.PointLight("meshLight_" + mesh.name, meshPosition, scene);
+
+                // Устанавливаем интенсивность света
+                light.intensity = 10;
+
+                // Дополнительные настройки света (по желанию)
+                light.diffuse = new BABYLON.Color3(1, 1, 1); // Цвет диффузного освещения
+                light.specular = new BABYLON.Color3(0.5, 0.5, 0.5); // Цвет бликов
+                light.range = 100; // Радиус действия света (опционально)
+
+                // Привязываем свет к мешу (опционально)
+                // Это позволит свету двигаться вместе с мешем
+                //light.parent = mesh;
+
+            } else {
+                // console.error("Mesh not found for material:", mesh.name);
+            }*/
+
             mesh.checkCollisions = true; // Отключаем для всех объектов, кроме этого
             mesh.collisionGroup = GROUND_MASK;
             mesh.collisionMask = GROUND_MASK;
@@ -520,9 +545,12 @@ function loadModel(path, debug = false) {
 
         // Настраиваем материалы после загрузки
         scene.meshes.forEach(mesh => {
+
+           
+
             if (mesh.material) {
                 const material = mesh.material;
-                console.log("material", material.name, material.roughness);
+                // console.log("material", material.name, material.roughness);
                 // Проверяем и добавляем свечение
                 if (material.emissiveColor) {
                     if (mesh.name == "ring")
@@ -534,9 +562,28 @@ function loadModel(path, debug = false) {
 
                     if (material.name.includes("light")) {
 
-                        const intensity = 1.0; // Уровень интенсивности
+                        const intensity = 2.0; // Уровень интенсивности
                         material.emissiveColor = new BABYLON.Color3(1, 1, 1).scale(intensity);
+                        // Создаем точечный свет для материала
+                        // const lightPosition = new BABYLON.Vector3(0, 0, 0); // Позиция света относительно объекта
+                        // const pointLight = new BABYLON.PointLight("pointLight_" + material.name, lightPosition, scene);
+
+                        // Настраиваем свойства света
+                        // pointLight.intensity = intensity; // Интенсивность света
+                        // pointLight.diffuse = new BABYLON.Color3(1, 1, 1); // Основной цвет света
+                        // pointLight.specular = new BABYLON.Color3(1, 1, 1); // Цвет бликов
+
+                        // Если материал привязан к определенному объекту, устанавливаем позицию света на объект
+                        const mesh = scene.meshes.find(mesh => mesh.material === material);
+
+
+
                     }
+
+                    /* if(material.name == "Material.002") {
+                         material.alpha = 0.25;
+                     }*/
+
 
 
                     /* if (material.name.includes("Ccl Net Curtain Fabric") || material.name === "Material") {
@@ -561,57 +608,57 @@ function loadModel(path, debug = false) {
         });
         // Извлекаем путь из modelPath
         const pathhdr = path.substring(0, path.lastIndexOf('/') + 1);
-      // scene.createDefaultEnvironment();
-      // scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("https://playground.babylonjs.com/textures/environment.dds", scene);
-      if(debug)
-      scene.debugLayer.show({
-        embedMode: true,  // Помещает отладочный слой внутрь страницы
-        overlay: true,    // Использует наложение, предотвращая растягивание
-    });
+        // scene.createDefaultEnvironment();
+        // scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("https://playground.babylonjs.com/textures/environment.dds", scene);
+        if (debug)
+            scene.debugLayer.show({
+                embedMode: true,  // Помещает отладочный слой внутрь страницы
+                overlay: true,    // Использует наложение, предотвращая растягивание
+            });
 
-      /* scene.debugLayer.show({
-        embedMode: true, // Размещение отладочного слоя внутри веб-страницы
-        position: BABYLON.DebugLayer.Position.TOP_RIGHT, // Позиция отладочного слоя
-        overlay: true // Использовать наложение, чтобы не растягивать экран
-    });*/
-   // scene.debugLayer.setSize(window.innerWidth * 0.5, window.innerHeight * 0.5);
+        /* scene.debugLayer.show({
+          embedMode: true, // Размещение отладочного слоя внутри веб-страницы
+          position: BABYLON.DebugLayer.Position.TOP_RIGHT, // Позиция отладочного слоя
+          overlay: true // Использовать наложение, чтобы не растягивать экран
+      });*/
+        // scene.debugLayer.setSize(window.innerWidth * 0.5, window.innerHeight * 0.5);
         // Теперь создаем HDR текстуру, используя тот же путь
-       const hdrTexture = new BABYLON.HDRCubeTexture(pathhdr + "envMap.hdr", scene, 512);
-      // hdrTexture.level = 0.5;
-       //scene.activeCamera.exposure = 0.1; 
+        const hdrTexture = new BABYLON.HDRCubeTexture(pathhdr + "envMap.hdr", scene, 512);
+        // hdrTexture.level = 0.5;
+        //scene.activeCamera.exposure = 0.1; 
         // Устанавливаем как карту окружения
         scene.environmentTexture = hdrTexture;
-       /* scene.environmentTexture.coordinatesMode = BABYLON.Texture.SPHERICAL_MODE;
-scene.environmentTexture.gammaSpace = false;
-scene.imageProcessingConfiguration.toneMappingEnabled = true;
-scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES; // Использование ACES*/
-      //  scene.environmentTexture.rotationY = Math.PI ; 
-       // scene.environmentIntensity = 0.5;
-       // scene.environmentIntensity = 3.0;
-       // scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Черный фон
+        /* scene.environmentTexture.coordinatesMode = BABYLON.Texture.SPHERICAL_MODE;
+ scene.environmentTexture.gammaSpace = false;
+ scene.imageProcessingConfiguration.toneMappingEnabled = true;
+ scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES; // Использование ACES*/
+        //  scene.environmentTexture.rotationY = Math.PI ; 
+        // scene.environmentIntensity = 0.5;
+        // scene.environmentIntensity = 3.0;
+        // scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Черный фон
         //scene.createDefaultSkybox(hdrTexture, true, 1000, 0.3); // Skybox
 
         // Добавление света
-        //  var light2 = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 0, 0), scene);
-        // light2.intensity = 0.2;
+        /* var light2 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+        light2.intensity = 0.5;*/
 
         // Создаем направленный свет (как солнце)
-/*const sunLight = new BABYLON.DirectionalLight("sunLight", new BABYLON.Vector3(0, -1, 0), scene);
-
-// Настроим яркость света, чтобы она была похожа на солнечное освещение
-sunLight.intensity = 1.0;  // Интенсивность света (можно настроить в зависимости от сцены)
-
-// Устанавливаем цвет света для имитации солнечного цвета
-sunLight.diffuse = new BABYLON.Color3(1, 1, 0.9);  // Желтоватый оттенок, как у солнца
-
-// Настроим позицию, чтобы солнечные лучи падали под правильным углом
-// В Blender солнце обычно расположено высоко над сценой, направлено вниз
-sunLight.position = new BABYLON.Vector3(0, 100, 0); // Высота света (можно настроить в зависимости от нужд)
-sunLight.setDirectionToTarget(new BABYLON.Vector3(0, 0, 0)); // Направление света к центру сцены
-
-// Настроим тени от солнечного света, если это необходимо
-sunLight.shadowMinZ = 1.0;  // Минимальное расстояние от света для теней
-sunLight.shadowMaxZ = 1000.0;  // Максимальное расстояние для теней*/
+        /*const sunLight = new BABYLON.DirectionalLight("sunLight", new BABYLON.Vector3(0, -1, 0), scene);
+        
+        // Настроим яркость света, чтобы она была похожа на солнечное освещение
+        sunLight.intensity = 1.0;  // Интенсивность света (можно настроить в зависимости от сцены)
+        
+        // Устанавливаем цвет света для имитации солнечного цвета
+        sunLight.diffuse = new BABYLON.Color3(1, 1, 0.9);  // Желтоватый оттенок, как у солнца
+        
+        // Настроим позицию, чтобы солнечные лучи падали под правильным углом
+        // В Blender солнце обычно расположено высоко над сценой, направлено вниз
+        sunLight.position = new BABYLON.Vector3(0, 100, 0); // Высота света (можно настроить в зависимости от нужд)
+        sunLight.setDirectionToTarget(new BABYLON.Vector3(0, 0, 0)); // Направление света к центру сцены
+        
+        // Настроим тени от солнечного света, если это необходимо
+        sunLight.shadowMinZ = 1.0;  // Минимальное расстояние от света для теней
+        sunLight.shadowMaxZ = 1000.0;  // Максимальное расстояние для теней*/
 
         //progressBar.width = "100%"; // Заполнить прогресс-бар
         // progressText.text = "Загрузка завершена!";
