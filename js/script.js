@@ -14,7 +14,10 @@ let engine;
 let scene;
 let camera;
 let statsFPS, statsMS, statsMB;
-
+let currentCircle; // Переменная для хранения текущего круга
+// Создаем группы столкновений (лучше использовать битовые маски)
+const GROUND_MASK = 1 << 0; // 1
+const CIRCLE_MASK = 1 << 1; // 2
 
 export function stop3DTour() {
     engine.stopRenderLoop();
@@ -322,142 +325,10 @@ export function start3DTour(modelPath, debug = false) {
 
 // Включаем стандартный индикатор загрузки (крутящийся круг)
 
-// Создаем группы столкновений (лучше использовать битовые маски)
-const GROUND_MASK = 1 << 0; // 1
-const CIRCLE_MASK = 1 << 1; // 2
 
 
 
 
-
-
-//  const gui = new dat.GUI();
-
-// Создаем папку для SSAO настроек
-// const ssaoFolder = gui.addFolder('SSAO Settings');
-
-// Управляем параметрами через пользовательские действия
-/* ssaoFolder.add({ ssaoRatio: 0.5 }, 'ssaoRatio', 0.1, 1).name('SSAO Ratio').onChange(function (value) {
-     ssaoPipeline.dispose(); // Удаляем старый пайплайн
-     ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
-         ssaoRatio: value, // Обновляем параметр
-         blurRatio: ssaoPipeline.blurRatio // Сохраняем остальные настройки
-     });
-     ssaoPipeline.samples = 16;
-     ssaoPipeline.expensiveBlur = true;
-     scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
- });
-
- ssaoFolder.add({ blurRatio: 0.5 }, 'blurRatio', 0.1, 1).name('Blur Ratio').onChange(function (value) {
-     ssaoPipeline.dispose(); // Удаляем старый пайплайн
-     ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
-         ssaoRatio: ssaoPipeline.ssaoRatio, // Сохраняем остальные настройки
-         blurRatio: value
-     });
-     ssaoPipeline.samples = 16;
-     ssaoPipeline.expensiveBlur = true;
-     scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
- });*/
-
-// Добавляем другие параметры напрямую
-/*  ssaoFolder.add(ssaoPipeline, 'samples', 1, 32).name('Samples').onChange(function (value) {
-      ssaoPipeline.samples = Math.floor(value);
-  });
-
-  ssaoFolder.add(ssaoPipeline, 'maxZ', 1, 1000).name('Max Z').onChange(function (value) {
-      ssaoPipeline.maxZ = value;
-  });
-
-  ssaoFolder.add(ssaoPipeline, 'radius', 0.1, 5).name('Radius').onChange(function (value) {
-      ssaoPipeline.radius = value;
-  });
-
-  ssaoFolder.add(ssaoPipeline, 'totalStrength', 0, 10).name('Total Strength').onChange(function (value) {
-      ssaoPipeline.totalStrength = value;
-  });
-
-  ssaoFolder.add(ssaoPipeline, 'base', 0, 1).name('Base').onChange(function (value) {
-      ssaoPipeline.base = value;
-  });
-
-  // Открываем GUI
-  ssaoFolder.open();*/
-
-
-
-
-
-
-// Создание света
-// const light = new BABYLON.DirectionalLight("light", new BABYLON.Vector3(-1, -2, -1), scene);
-// light.position = new BABYLON.Vector3(10, 10, 0);
-// Включение теней
-// light.shadowMinZ = 1;
-// light.shadowMaxZ = 1000;
-// const shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
-
-// Создание пола, чтобы увидеть тени
-//const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 10, height: 10 }, scene);
-// ground.receiveShadows = true; // Пол также будет принимать тени
-// Загрузка HDRI текстуры по умолчанию
-
-
-// Загрузка GLB файла по умолчанию
-/*  BABYLON.SceneLoader.Append("./", "untitled.glb", scene, function (scene) {
-      scene.createDefaultCameraOrLight(true, true, true); // Создаем стандартную камеру и свет, если их нет
-  });*/
-
-
-
-
-let currentCircle; // Переменная для хранения текущего круга
-
-
-//  var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
-
-/*  const progressBar = new BABYLON.GUI.Rectangle();
-  progressBar.width = "400px";
-  progressBar.height = "20px";
-  progressBar.color = "white";
-  progressBar.thickness = 2;
-  progressBar.background = "green";
-  progressBar.top = "10px";
-  progressBar.left = "10px";
-  progressBar.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-  progressBar.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
-  advancedTexture.addControl(progressBar);
-
-  // Текст с процентом
-  const progressText = new BABYLON.GUI.TextBlock();
-  progressText.text = "Загрузка: 0%";
-  progressText.color = "white";
-  progressText.fontSize = 24;
-  progressText.top = "15px";
-  progressText.left = "15px";
-  progressText.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-  progressText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
-  advancedTexture.addControl(progressText);*/
-
-
-/*   var fpsTextBlock = new BABYLON.GUI.TextBlock();
-   fpsTextBlock.text = "FPS: 0";
-   fpsTextBlock.fontSize = 24;
-   fpsTextBlock.color = "white";
-   fpsTextBlock.top = "10px";
-   fpsTextBlock.left = "10px";
-   advancedTexture.addControl(fpsTextBlock);*/
-/* scene.onDataLoadedObservable.add(() => {
-     console.log("Загрузка завершена");
-
-     // Скрытие загрузочного экрана
-     advancedTexture.dispose(); // Удалить GUI
- });*/
-
-
-/*  document.getElementById("loadModelButton").onclick = function () {
-      const modelPath = "Model/flat_1C1/flat_1C1.glb"; // Замените на путь к вашему GBL файлу
-      loadModel(modelPath);
-  };*/
 
 function loadModel(path, debug = false) {
     // Загрузка GLB модели
@@ -512,29 +383,29 @@ function loadModel(path, debug = false) {
             if (mesh.name === "bath_carpet")
                 return;
 
-          /*  if (mesh.name === "main_room_lamp_primitive0") { // Проверяем, что меш существует
-               
-                // Получаем позицию меша для размещения света
-                const meshPosition = mesh.getAbsolutePosition();
-                console.log("Mesh found:", mesh.name, meshPosition);
-                // Создаем точечный свет (PointLight) в позиции меша
-                const light = new BABYLON.PointLight("meshLight_" + mesh.name, meshPosition, scene);
-
-                // Устанавливаем интенсивность света
-                light.intensity = 10;
-
-                // Дополнительные настройки света (по желанию)
-                light.diffuse = new BABYLON.Color3(1, 1, 1); // Цвет диффузного освещения
-                light.specular = new BABYLON.Color3(0.5, 0.5, 0.5); // Цвет бликов
-                light.range = 100; // Радиус действия света (опционально)
-
-                // Привязываем свет к мешу (опционально)
-                // Это позволит свету двигаться вместе с мешем
-                //light.parent = mesh;
-
-            } else {
-                // console.error("Mesh not found for material:", mesh.name);
-            }*/
+            /*  if (mesh.name === "main_room_lamp_primitive0") { // Проверяем, что меш существует
+                 
+                  // Получаем позицию меша для размещения света
+                  const meshPosition = mesh.getAbsolutePosition();
+                  console.log("Mesh found:", mesh.name, meshPosition);
+                  // Создаем точечный свет (PointLight) в позиции меша
+                  const light = new BABYLON.PointLight("meshLight_" + mesh.name, meshPosition, scene);
+  
+                  // Устанавливаем интенсивность света
+                  light.intensity = 10;
+  
+                  // Дополнительные настройки света (по желанию)
+                  light.diffuse = new BABYLON.Color3(1, 1, 1); // Цвет диффузного освещения
+                  light.specular = new BABYLON.Color3(0.5, 0.5, 0.5); // Цвет бликов
+                  light.range = 100; // Радиус действия света (опционально)
+  
+                  // Привязываем свет к мешу (опционально)
+                  // Это позволит свету двигаться вместе с мешем
+                  //light.parent = mesh;
+  
+              } else {
+                  // console.error("Mesh not found for material:", mesh.name);
+              }*/
 
             mesh.checkCollisions = true; // Отключаем для всех объектов, кроме этого
             mesh.collisionGroup = GROUND_MASK;
@@ -546,7 +417,7 @@ function loadModel(path, debug = false) {
         // Настраиваем материалы после загрузки
         scene.meshes.forEach(mesh => {
 
-           
+
 
             if (mesh.material) {
                 const material = mesh.material;
@@ -562,7 +433,7 @@ function loadModel(path, debug = false) {
 
                     if (material.name.includes("light")) {
 
-                        const intensity = 2.0; // Уровень интенсивности
+                        const intensity = 1.0; // Уровень интенсивности
                         material.emissiveColor = new BABYLON.Color3(1, 1, 1).scale(intensity);
                         // Создаем точечный свет для материала
                         // const lightPosition = new BABYLON.Vector3(0, 0, 0); // Позиция света относительно объекта
@@ -861,47 +732,8 @@ let isMouseDown = false;
 let isMouseMoved = false;
 let lastMousePosition = null;
 
-// Обработчик клика для движения камеры
-/* canvas.addEventListener("click", function (event) {
-     console.log("Mouse up detected:", event.button);
-     // Если левая кнопка мыши была нажата и не было перемещения мыши
-     if (event.button === 0 && !isMouseMoved) {
-         const pickResult = scene.pick(scene.pointerX, scene.pointerY);
-
-         if (pickResult.hit) {
-             // Точка, в которую мы хотим двигать камеру
-             const targetPoint = pickResult.pickedPoint;
-
-             // Ищем ближайшую точку, где нет коллизий
-             const safePoint = findSafePoint(targetPoint);
-
-             // Двигаем камеру в безопасную точку
-             moveCameraToPoint(safePoint);
-         }
-     }
- });*/
-
-// Обработчик зажатия левой кнопки мыши
-/* canvas.addEventListener("mousedown", function (event) {
-
-     if (event.button === 0) { // Проверяем, если нажата левая кнопка мыши
-         isMouseDown = true;
-         isMouseMoved = false; // Сбросим флаг, если зажали кнопку
-         lastMousePosition = new BABYLON.Vector2(scene.pointerX, scene.pointerY);
-     }
- });*/
 
 
-/*  scene.onPointerMove = function (evt) {
-             const pickResult = scene.pick(evt.clientX, evt.clientY);
- 
-             if (pickResult.hit) {
-                 console.log("Точка пересечения:", pickResult.pickedPoint);
-                 console.log("Объект, с которым произошло пересечение:", pickResult.pickedMesh);
-             }
-         };*/
-
-// Добавляем GUI для рисования круга
 
 
 const predicate = (mesh) => {
@@ -929,7 +761,6 @@ function findSafePoint(targetPoint) {
         return hit.pickedPoint.subtract(ray.direction.scale(0.5));  // Понижаем точку немного
     }
 }
-
 
 
 // Функция для плавного движения камеры
