@@ -545,8 +545,8 @@ function loadModel(path, debug = false) {
         //scene.createDefaultSkybox(hdrTexture, true, 1000, 0.3); // Skybox
 
         // Добавление света
-        var light2 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-        light2.intensity = 0.5;
+       // var light2 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+       // light2.intensity = 0.5;
 
         // Создаем направленный свет (как солнце)
         /*const sunLight = new BABYLON.DirectionalLight("sunLight", new BABYLON.Vector3(0, -1, 0), scene);
