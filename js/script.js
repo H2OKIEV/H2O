@@ -84,7 +84,7 @@ export function start3DTour(modelPath, debug = false) {
         ssaoPipeline.totalStrength = 3.9;       // Интенсивность AO
         ssaoPipeline.base = 0.6;
         scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
-
+        // scene.postProcessRenderPipelineManager.attachPipelinesToRender(ssao, true);
         const fxaa = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
 
         // Предполагается, что библиотека SMAA импортирована
@@ -137,6 +137,9 @@ export function start3DTour(modelPath, debug = false) {
         const glowLayer = new BABYLON.GlowLayer("glow", scene);
         glowLayer.intensity = 0.5;
         glowLayer.addExcludedMesh(currentCircle);
+
+
+
 
 
         scene.onBeforeRenderObservable.add(() => {
@@ -410,6 +413,7 @@ function loadModel(path, debug = false) {
             mesh.checkCollisions = true; // Отключаем для всех объектов, кроме этого
             mesh.collisionGroup = GROUND_MASK;
             mesh.collisionMask = GROUND_MASK;
+            // mesh.setEnabled(false); 
             // mesh.showBoundingBox = true;
 
         });
@@ -430,6 +434,11 @@ function loadModel(path, debug = false) {
                     // material.emissiveColor = new BABYLON.Color3(1, 1, 0); // Желтое свечение
                     const emissiveIntensity =
                         (material.emissiveColor.r + material.emissiveColor.g + material.emissiveColor.b) / 3;
+
+                    if (material.name === "Material") {//шторы
+                        material.indexOfRefraction = 3;
+                       // material.metallic = 0.6;
+                    }
 
                     if (material.name.includes("light")) {
 
@@ -499,6 +508,32 @@ function loadModel(path, debug = false) {
         //scene.activeCamera.exposure = 0.1; 
         // Устанавливаем как карту окружения
         scene.environmentTexture = hdrTexture;
+
+        // Загрузка текстуры для окружения
+        /*const environmentTexture = new BABYLON.Texture(pathhdr +"environmentTexture.jpg", scene);
+        
+        
+        
+        // Создание скайбокса
+        const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
+        const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
+        skyboxMaterial.backFaceCulling = true; // Отключение отсечения задних граней
+        skyboxMaterial.reflectionTexture = environmentTexture;
+        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE; // Установка режима текстуры
+        skyboxMaterial.disableLighting = true; // Отключение освещения на скайбоксе
+        skybox.material = skyboxMaterial;*/
+
+        var dome = new BABYLON.PhotoDome(
+            "testdome",
+            pathhdr + "environmentTexture.jpg",
+            {
+                resolution: 32,
+                size: 1000,
+                useDirectMapping: true
+            },
+            scene
+        );
+
         /* scene.environmentTexture.coordinatesMode = BABYLON.Texture.SPHERICAL_MODE;
  scene.environmentTexture.gammaSpace = false;
  scene.imageProcessingConfiguration.toneMappingEnabled = true;
@@ -510,8 +545,8 @@ function loadModel(path, debug = false) {
         //scene.createDefaultSkybox(hdrTexture, true, 1000, 0.3); // Skybox
 
         // Добавление света
-        /* var light2 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-        light2.intensity = 0.5;*/
+        var light2 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+        light2.intensity = 0.5;
 
         // Создаем направленный свет (как солнце)
         /*const sunLight = new BABYLON.DirectionalLight("sunLight", new BABYLON.Vector3(0, -1, 0), scene);
