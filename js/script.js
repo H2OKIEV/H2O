@@ -9,6 +9,7 @@ const modal = document.getElementById('modal');
 
 const closeModal = document.getElementById('closeModal');
 let canvas = document.getElementById('renderCanvas');
+let canvas2 = document.getElementById('modalContent');
 let sceneCreated = false;
 let engine;
 let scene;
@@ -18,6 +19,7 @@ let currentCircle; // Переменная для хранения текуще�
 // Создаем группы столкновений (лучше использовать битовые маски)
 const GROUND_MASK = 1 << 0; // 1
 const CIRCLE_MASK = 1 << 1; // 2
+let loadingScreen = new BABYLON.DefaultLoadingScreen(canvas, "Loading...");
 
 export function stop3DTour() {
     engine.stopRenderLoop();
@@ -27,39 +29,28 @@ export function start3DTour(modelPath, debug = false) {
     if (!sceneCreated) {
 
         engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, antialiasing: true });
-
+        engine.resize();
         scene = new BABYLON.Scene(engine);
 
-
-        camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(-2, 1.5, 1), scene);
-        scene.activeCamera.viewport = new BABYLON.Viewport(0, 0, 1, 1);
-        camera.setTarget(new BABYLON.Vector3(-3, 1.5, 1)); // Точка, на которую смотрит камера
-        camera.minZ = 0.1;
-        // Устанавливаем радиус коллизий камеры
-        camera.checkCollisions = true;
-        camera.collisionsEnabled = true;
-        camera.radius = 0.1;  // Радиус столкновения камеры
-        camera.ellipsoid = new BABYLON.Vector3(0.2, 1.0, 0.2);
-        // Включаем коллизии для объектов на сцене
-        scene.collisionsEnabled = true;
-        // Закрепляем управление на холсте
-        camera.attachControl(canvas, true);
-
-        statsFPS = new Stats();
-        statsFPS.showPanel(0); // Панель FPS
-        document.body.appendChild(statsFPS.dom);
-
-        statsMS = new Stats();
-        statsMS.showPanel(1); // Панель MS
-        statsMS.dom.style.cssText = 'position:absolute;top:40px;left:0;'; // Сдвиг для отображения рядом
-        document.body.appendChild(statsMS.dom);
-
-        statsMB = new Stats();
-        statsMB.showPanel(2); // Панель MB
-        statsMB.dom.style.cssText = 'position:absolute;top:0;left:80px;'; // Ещё один сдвиг
-        document.body.appendChild(statsMB.dom);
+        // loadingScreen = new BABYLON.DefaultLoadingScreen(canvas, "Loading...");
+        // engine.loadingScreen = loadingScreen;
+        loadingScreen.displayLoadingUI();
 
 
+
+
+
+
+
+
+        // scene.loadingUIText = "Загрузка...";  // Текст для отображения на экране
+        //scene.loadingScreen = new BABYLON.DefaultLoadingScreen(engine, scene);
+        // scene.loadingScreen.displayLoadingUI(); // Показываем экран загрузки
+        // Замените на путь к вашему GBL файлу
+
+        loadModel(modelPath, debug);
+
+        sceneCreated = true;
 
         // Ограничение высоты камеры
         scene.onBeforeRenderObservable.add(() => {
@@ -71,77 +62,10 @@ export function start3DTour(modelPath, debug = false) {
             }
         });
 
-        let ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
-            ssaoRatio: 0.5,       // Коэффициент разрешения SSAO
-            blurRatio: 0.5        // Коэффициент разрешения размытия
-
-        });
-
-        ssaoPipeline.expensiveBlur = true;       // Более качественное размытие
-        ssaoPipeline.samples = 16;              // Количество выборок для AO
-        ssaoPipeline.maxZ = 424;                // Максимальная глубина AO
-        ssaoPipeline.radius = 0.6;                 // Радиус выборки AO
-        ssaoPipeline.totalStrength = 3.9;       // Интенсивность AO
-        ssaoPipeline.base = 0.6;
-        scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
-        // scene.postProcessRenderPipelineManager.attachPipelinesToRender(ssao, true);
-        const fxaa = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
-
-        // Предполагается, что библиотека SMAA импортирована
-        // const taaRenderPipeline = new BABYLON.TAARenderingPipeline("taa", scene, [camera]);
-
-        // taaRenderPipeline.isEnabled = true;
-        //  taaRenderPipeline.samples = 8;
-
-
-        // Включаем управление клавиатурой
-        camera.keysUp.push(87);    // W - вперед
-        camera.keysDown.push(83);  // S - назад
-        camera.keysLeft.push(65);  // A - влево
-        camera.keysRight.push(68); // D - вправо
-
-        // Настраиваем скорость передвижения
-        camera.speed = 0.1;
-        camera.onCollide = function (collidedMesh) {
-            console.log("Камера столкнулась с объектом: " + collidedMesh.name);
-        };
-
-        // Добавление Bloom через DefaultRenderingPipeline
-        const pipeline = new BABYLON.DefaultRenderingPipeline("defaultPipeline", true, scene, [camera]);
-        /* pipeline.bloomEnabled = true;
-          pipeline.bloomThreshold = 0.6;
-          pipeline.bloomIntensity = 1.0;*/
-
-        // Создаем кольцо (торус)
-        currentCircle = BABYLON.MeshBuilder.CreateTorus("ring", {
-            diameter: 0.15, // Диаметр кольца
-            thickness: 0.02, // Толщина кольца
-            tessellation: 32 // Количество сегментов для гладкости
-        }, scene);
-
-        // Создаем материал для кольца
-        const material = new BABYLON.StandardMaterial("ringMaterial", scene);
-        material.emissiveColor = new BABYLON.Color3(1, 1, 1); // Белый цвет
-        material.disableLighting = true; // Отключаем освещение
-
-
-
-        material.backFaceCulling = false;
-        currentCircle.material = material;
-        currentCircle.collisionGroup = CIRCLE_MASK;
-        currentCircle.collisionMask = 0; // Не сталкивается ни с чем (или можно указать другую группу, если нужно)
-        currentCircle.checkCollisions = false;
-
-
-        // GlowLayer для выделения светящихся объектов
-        const glowLayer = new BABYLON.GlowLayer("glow", scene);
-        glowLayer.intensity = 0.5;
-        glowLayer.addExcludedMesh(currentCircle);
-
-
-
-
-
+        /*  camera.onCollide = function (collidedMesh) {
+              console.log("Камера столкнулась с объектом: " + collidedMesh.name);
+          };
+  */
         scene.onBeforeRenderObservable.add(() => {
             frameCounter++;
 
@@ -296,22 +220,7 @@ export function start3DTour(modelPath, debug = false) {
             }
         });
 
-        engine.resize();
-        scene.loadingUIText = "Загрузка...";  // Текст для отображения на экране
-        //scene.loadingScreen = new BABYLON.DefaultLoadingScreen(engine, scene);
-        // scene.loadingScreen.displayLoadingUI(); // Показываем экран загрузки
-        // Замените на путь к вашему GBL файлу
-        loadModel(modelPath, debug);
-        sceneCreated = true;
-        engine.runRenderLoop(() => {
-            statsFPS.begin();
-            statsMS.begin();
-            statsMB.begin();
-            scene.render(); // Возобновляем рендеринг существующей сцены
-            statsFPS.end();
-            statsMS.end();
-            statsMB.end();
-        });
+
     } else {
         engine.runRenderLoop(() => {
             statsFPS.begin();
@@ -335,35 +244,155 @@ export function start3DTour(modelPath, debug = false) {
 
 function loadModel(path, debug = false) {
     // Загрузка GLB модели
+    // engine.displayLoadingUI();
+    // Извлекаем путь из modelPath
+
+    const pathhdr = path.substring(0, path.lastIndexOf('/') + 1);
+    // scene.createDefaultEnvironment();
+    // scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("https://playground.babylonjs.com/textures/environment.dds", scene);
+    if (debug) {
+        scene.debugLayer.show({
+            embedMode: true,  // Помещает отладочный слой внутрь страницы
+            overlay: true,    // Использует наложение, предотвращая растягивание
+        });
+    }
+
+
+
+    const progressCallback = (progress) => {
+        let percentage = (progress.loaded / progress.total) * 100;
+        loadingScreen.loadingUIText = `Загрузка модели: ${Math.round(percentage)}%`;
+    }
+
     BABYLON.SceneLoader.ImportMesh("", "./", path, scene, (meshes) => {
+        console.log("Сцена создана.");
+
+        loadingScreen.loadingUIText = `Загрузка окружения`;
+        const hdrTexture = new BABYLON.HDRCubeTexture(pathhdr + "envMap.hdr", scene, 512);
+        // hdrTexture.level = 0.5;
+        //scene.activeCamera.exposure = 0.1; 
+        // Устанавливаем как карту окружения
+        scene.environmentTexture = hdrTexture;
+
+        var dome = new BABYLON.PhotoDome(
+            "testdome",
+            pathhdr + "environmentTexture.jpg",
+            {
+                resolution: 32,
+                size: 1000,
+                useDirectMapping: true
+            },
+            scene
+        );
+
+        statsFPS = new Stats();
+        statsFPS.showPanel(0); // Панель FPS
+        document.body.appendChild(statsFPS.dom);
+
+        statsMS = new Stats();
+        statsMS.showPanel(1); // Панель MS
+        statsMS.dom.style.cssText = 'position:absolute;top:40px;left:0;'; // Сдвиг для отображения рядом
+        document.body.appendChild(statsMS.dom);
+
+        statsMB = new Stats();
+        statsMB.showPanel(2); // Панель MB
+        statsMB.dom.style.cssText = 'position:absolute;top:0;left:80px;'; // Ещё один сдвиг
+        document.body.appendChild(statsMB.dom);
 
 
-        meshes.forEach(function (mesh) {
 
-            if (mesh.material) {
-                const material = mesh.material;
 
-                const isMirrorMaterial = material.name && material.name.toLowerCase().includes("mirror");
-                // Проверяем условия для металличности и шероховатости
-                const isReflectiveMaterial = material.metallic >= 0.9 && material.roughness <= 0.1 && material.reflectivity >= 0.8;
-                // Проверяем userData для дополнительной метки
-                const hasUserDataMirror = material.userData && material.userData.isMirror;
-                //console.log("Found mirror-like material:", material.name);
 
-                if (isMirrorMaterial || isReflectiveMaterial || hasUserDataMirror) {
-                    console.log("Found mirror-like material:", material.name, mesh.name);
-                    applyMirrorEffect(mesh, scene, camera); // Применяем эффект зеркала                           
-                }
-            }
+
+
+        // Создаем кольцо (торус)
+        currentCircle = BABYLON.MeshBuilder.CreateTorus("ring", {
+            diameter: 0.15, // Диаметр кольца
+            thickness: 0.02, // Толщина кольца
+            tessellation: 32 // Количество сегментов для гладкости
+        }, scene);
+
+        // Создаем материал для кольца
+        const material = new BABYLON.StandardMaterial("ringMaterial", scene);
+        material.emissiveColor = new BABYLON.Color3(1, 1, 1); // Белый цвет
+        material.disableLighting = true; // Отключаем освещение
+
+
+
+        material.backFaceCulling = false;
+        currentCircle.material = material;
+        currentCircle.collisionGroup = CIRCLE_MASK;
+        currentCircle.collisionMask = 0; // Не сталкивается ни с чем (или можно указать другую группу, если нужно)
+        currentCircle.checkCollisions = false;
+
+
+        // GlowLayer для выделения светящихся объектов
+        const glowLayer = new BABYLON.GlowLayer("glow", scene);
+        glowLayer.intensity = 0.5;
+        glowLayer.addExcludedMesh(currentCircle);
+        camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(-2, 1.5, 1), scene);
+        scene.activeCamera.viewport = new BABYLON.Viewport(0, 0, 1, 1);
+        camera.setTarget(new BABYLON.Vector3(-3, 1.5, 1)); // Точка, на которую смотрит камера
+        camera.minZ = 0.1;
+        // Устанавливаем радиус коллизий камеры
+        camera.checkCollisions = true;
+        camera.collisionsEnabled = true;
+        camera.radius = 0.1;  // Радиус столкновения камеры
+        camera.ellipsoid = new BABYLON.Vector3(0.2, 1.0, 0.2);
+        // Включаем коллизии для объектов на сцене
+        scene.collisionsEnabled = true;
+        // Закрепляем управление на холсте
+        camera.attachControl(canvas, true);
+        // Включаем управление клавиатурой
+        camera.keysUp.push(87);    // W - вперед
+        camera.keysDown.push(83);  // S - назад
+        camera.keysLeft.push(65);  // A - влево
+        camera.keysRight.push(68); // D - вправо
+
+        // Настраиваем скорость передвижения
+        camera.speed = 0.1;
+
+        let ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
+            ssaoRatio: 0.5,       // Коэффициент разрешения SSAO
+            blurRatio: 0.5        // Коэффициент разрешения размытия
 
         });
 
-        // Установка свойств для отбрасывания теней
-        /*  meshes.forEach(mesh => {
-              mesh.receiveShadows = true; // Модель будет принимать тени
-              mesh.castShadows = true; // Модель будет отбрасывать тени
-              // Дополнительно: можно настроить материал, если требуется
-          });*/
+        ssaoPipeline.expensiveBlur = true;       // Более качественное размытие
+        ssaoPipeline.samples = 16;              // Количество выборок для AO
+        ssaoPipeline.maxZ = 424;                // Максимальная глубина AO
+        ssaoPipeline.radius = 0.6;                 // Радиус выборки AO
+        ssaoPipeline.totalStrength = 3.9;       // Интенсивность AO
+        ssaoPipeline.base = 0.6;
+        scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
+        // scene.postProcessRenderPipelineManager.attachPipelinesToRender(ssao, true);
+        const fxaa = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
+
+        // Предполагается, что библиотека SMAA импортирована
+        // const taaRenderPipeline = new BABYLON.TAARenderingPipeline("taa", scene, [camera]);
+
+        // taaRenderPipeline.isEnabled = true;
+        //  taaRenderPipeline.samples = 8;
+
+
+
+
+
+        // Добавление Bloom через DefaultRenderingPipeline
+        const pipeline = new BABYLON.DefaultRenderingPipeline("defaultPipeline", true, scene, [camera]);
+        /* pipeline.bloomEnabled = true;
+          pipeline.bloomThreshold = 0.6;
+          pipeline.bloomIntensity = 1.0;*/
+        engine.runRenderLoop(() => {
+            statsFPS.begin();
+            statsMS.begin();
+            statsMB.begin();
+            scene.render(); // Возобновляем рендеринг существующей сцены
+            statsFPS.end();
+            statsMS.end();
+            statsMB.end();
+        });
+
 
         meshes.forEach((mesh) => {
             // console.log(mesh.name);
@@ -385,96 +414,61 @@ function loadModel(path, debug = false) {
                 return;
             if (mesh.name === "bath_carpet")
                 return;
-
-            /*  if (mesh.name === "main_room_lamp_primitive0") { // Проверяем, что меш существует
-                 
-                  // Получаем позицию меша для размещения света
-                  const meshPosition = mesh.getAbsolutePosition();
-                  console.log("Mesh found:", mesh.name, meshPosition);
-                  // Создаем точечный свет (PointLight) в позиции меша
-                  const light = new BABYLON.PointLight("meshLight_" + mesh.name, meshPosition, scene);
-  
-                  // Устанавливаем интенсивность света
-                  light.intensity = 10;
-  
-                  // Дополнительные настройки света (по желанию)
-                  light.diffuse = new BABYLON.Color3(1, 1, 1); // Цвет диффузного освещения
-                  light.specular = new BABYLON.Color3(0.5, 0.5, 0.5); // Цвет бликов
-                  light.range = 100; // Радиус действия света (опционально)
-  
-                  // Привязываем свет к мешу (опционально)
-                  // Это позволит свету двигаться вместе с мешем
-                  //light.parent = mesh;
-  
-              } else {
-                  // console.error("Mesh not found for material:", mesh.name);
-              }*/
+            if (mesh.name == "ring")
+                return;
 
             mesh.checkCollisions = true; // Отключаем для всех объектов, кроме этого
             mesh.collisionGroup = GROUND_MASK;
             mesh.collisionMask = GROUND_MASK;
-            // mesh.setEnabled(false); 
-            // mesh.showBoundingBox = true;
-
-        });
-
-        // Настраиваем материалы после загрузки
-        scene.meshes.forEach(mesh => {
-
-
+            //mesh.setEnabled(false); 
+            //mesh.showBoundingBox = true;
+            //mesh.receiveShadows = true; // Модель будет принимать тени
+            //mesh.castShadows = true; // Модель будет отбрасывать тени
 
             if (mesh.material) {
                 const material = mesh.material;
-                // console.log("material", material.name, material.roughness);
-                // Проверяем и добавляем свечение
+
+                const isMirrorMaterial = material.name && material.name.toLowerCase().includes("mirror");
+                // Проверяем условия для металличности и шероховатости
+                const isReflectiveMaterial = material.metallic >= 0.9 && material.roughness <= 0.1 && material.reflectivity >= 0.8;
+                // Проверяем userData для дополнительной метки
+                const hasUserDataMirror = material.userData && material.userData.isMirror;
+                //console.log("Found mirror-like material:", material.name);
+
+                if (isMirrorMaterial || isReflectiveMaterial || hasUserDataMirror) {
+                    console.log("Found mirror-like material:", material.name, mesh.name);
+                    applyMirrorEffect(mesh, scene, camera); // Применяем эффект зеркала                           
+                }
+
+                if (material.name === "Material") {//шторы
+                    material.indexOfRefraction = 3;
+                    // material.metallic = 0.6;
+                }
+
+                if (material.name.includes("light")) {
+
+                    const intensity = 1.0; // Уровень интенсивности
+                    material.emissiveColor = new BABYLON.Color3(1, 1, 1).scale(intensity);
+                    // Создаем точечный свет для материала
+                    // const lightPosition = new BABYLON.Vector3(0, 0, 0); // Позиция света относительно объекта
+                    // const pointLight = new BABYLON.PointLight("pointLight_" + material.name, lightPosition, scene);
+
+                    // Настраиваем свойства света
+                    // pointLight.intensity = intensity; // Интенсивность света
+                    // pointLight.diffuse = new BABYLON.Color3(1, 1, 1); // Основной цвет света
+                    // pointLight.specular = new BABYLON.Color3(1, 1, 1); // Цвет бликов
+
+                    // Если материал привязан к определенному объекту, устанавливаем позицию света на объект
+                    //const mesh = scene.meshes.find(mesh => mesh.material === material);
+                }
+
                 if (material.emissiveColor) {
-                    if (mesh.name == "ring")
-                        return;
 
                     // material.emissiveColor = new BABYLON.Color3(1, 1, 0); // Желтое свечение
                     const emissiveIntensity =
                         (material.emissiveColor.r + material.emissiveColor.g + material.emissiveColor.b) / 3;
 
-                    if (material.name === "Material") {//шторы
-                        material.indexOfRefraction = 3;
-                       // material.metallic = 0.6;
-                    }
 
-                    if (material.name.includes("light")) {
-
-                        const intensity = 1.0; // Уровень интенсивности
-                        material.emissiveColor = new BABYLON.Color3(1, 1, 1).scale(intensity);
-                        // Создаем точечный свет для материала
-                        // const lightPosition = new BABYLON.Vector3(0, 0, 0); // Позиция света относительно объекта
-                        // const pointLight = new BABYLON.PointLight("pointLight_" + material.name, lightPosition, scene);
-
-                        // Настраиваем свойства света
-                        // pointLight.intensity = intensity; // Интенсивность света
-                        // pointLight.diffuse = new BABYLON.Color3(1, 1, 1); // Основной цвет света
-                        // pointLight.specular = new BABYLON.Color3(1, 1, 1); // Цвет бликов
-
-                        // Если материал привязан к определенному объекту, устанавливаем позицию света на объект
-                        const mesh = scene.meshes.find(mesh => mesh.material === material);
-
-
-
-                    }
-
-                    /* if(material.name == "Material.002") {
-                         material.alpha = 0.25;
-                     }*/
-
-
-
-                    /* if (material.name.includes("Ccl Net Curtain Fabric") || material.name === "Material") {
-                         console.log("emissiveColor", material.name);
-                         material.subSurface.isTranslucencyEnabled = true; // Включение эффекта полупрозрачности
-                         // material.subSurface.translucencyIntensity = 0.8; // Интенсивность рассеивания света
-                         // material.albedoColor = new BABYLON.Color3(1, 1, 1); // Цвет материала
-                         // material.alpha = 0.8; // Дополнительная прозрачность
-                         //material.metallic = 0.5;
-                         //material.roughness = 0.2;
-                     }*/
                     // glowLayer.addIncludedOnlyMesh(mesh);
                     //material.needAlphaBlending = true;
                     //material.backFaceCulling = false;
@@ -482,104 +476,21 @@ function loadModel(path, debug = false) {
 
                 }
 
-                // Добавляем меш в GlowLayer
-                //glowLayer.addIncludedOnlyMesh(mesh);
+
             }
+            loadingScreen.loadingUIText = `Обновление текстур для зеркала`;
+            
         });
-        // Извлекаем путь из modelPath
-        const pathhdr = path.substring(0, path.lastIndexOf('/') + 1);
-        // scene.createDefaultEnvironment();
-        // scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("https://playground.babylonjs.com/textures/environment.dds", scene);
-        if (debug)
-            scene.debugLayer.show({
-                embedMode: true,  // Помещает отладочный слой внутрь страницы
-                overlay: true,    // Использует наложение, предотвращая растягивание
-            });
-
-        /* scene.debugLayer.show({
-          embedMode: true, // Размещение отладочного слоя внутри веб-страницы
-          position: BABYLON.DebugLayer.Position.TOP_RIGHT, // Позиция отладочного слоя
-          overlay: true // Использовать наложение, чтобы не растягивать экран
-      });*/
-        // scene.debugLayer.setSize(window.innerWidth * 0.5, window.innerHeight * 0.5);
-        // Теперь создаем HDR текстуру, используя тот же путь
-        const hdrTexture = new BABYLON.HDRCubeTexture(pathhdr + "envMap.hdr", scene, 512);
-        // hdrTexture.level = 0.5;
-        //scene.activeCamera.exposure = 0.1; 
-        // Устанавливаем как карту окружения
-        scene.environmentTexture = hdrTexture;
-
-        // Загрузка текстуры для окружения
-        /*const environmentTexture = new BABYLON.Texture(pathhdr +"environmentTexture.jpg", scene);
-        
-        
-        
-        // Создание скайбокса
-        const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
-        const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
-        skyboxMaterial.backFaceCulling = true; // Отключение отсечения задних граней
-        skyboxMaterial.reflectionTexture = environmentTexture;
-        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE; // Установка режима текстуры
-        skyboxMaterial.disableLighting = true; // Отключение освещения на скайбоксе
-        skybox.material = skyboxMaterial;*/
-
-        var dome = new BABYLON.PhotoDome(
-            "testdome",
-            pathhdr + "environmentTexture.jpg",
-            {
-                resolution: 32,
-                size: 1000,
-                useDirectMapping: true
-            },
-            scene
-        );
-
-        /* scene.environmentTexture.coordinatesMode = BABYLON.Texture.SPHERICAL_MODE;
- scene.environmentTexture.gammaSpace = false;
- scene.imageProcessingConfiguration.toneMappingEnabled = true;
- scene.imageProcessingConfiguration.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES; // Использование ACES*/
-        //  scene.environmentTexture.rotationY = Math.PI ; 
-        // scene.environmentIntensity = 0.5;
-        // scene.environmentIntensity = 3.0;
-        // scene.clearColor = new BABYLON.Color4(0, 0, 0, 1); // Черный фон
-        //scene.createDefaultSkybox(hdrTexture, true, 1000, 0.3); // Skybox
-
-        // Добавление света
-       // var light2 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-       // light2.intensity = 0.5;
-
-        // Создаем направленный свет (как солнце)
-        /*const sunLight = new BABYLON.DirectionalLight("sunLight", new BABYLON.Vector3(0, -1, 0), scene);
-        
-        // Настроим яркость света, чтобы она была похожа на солнечное освещение
-        sunLight.intensity = 1.0;  // Интенсивность света (можно настроить в зависимости от сцены)
-        
-        // Устанавливаем цвет света для имитации солнечного цвета
-        sunLight.diffuse = new BABYLON.Color3(1, 1, 0.9);  // Желтоватый оттенок, как у солнца
-        
-        // Настроим позицию, чтобы солнечные лучи падали под правильным углом
-        // В Blender солнце обычно расположено высоко над сценой, направлено вниз
-        sunLight.position = new BABYLON.Vector3(0, 100, 0); // Высота света (можно настроить в зависимости от нужд)
-        sunLight.setDirectionToTarget(new BABYLON.Vector3(0, 0, 0)); // Направление света к центру сцены
-        
-        // Настроим тени от солнечного света, если это необходимо
-        sunLight.shadowMinZ = 1.0;  // Минимальное расстояние от света для теней
-        sunLight.shadowMaxZ = 1000.0;  // Максимальное расстояние для теней*/
-
-        //progressBar.width = "100%"; // Заполнить прогресс-бар
-        // progressText.text = "Загрузка завершена!";
 
 
     }, function (progress) {
-        // Обновление процента загрузки
-        // let percentage = (progress.loaded / progress.total) * 100;
-        //progressBar.width = percentage + "%";
-        // progressText.text = `Загрузка: ${Math.round(percentage)}%`;
+        progressCallback(progress)
     });
 
 
 
     scene.executeWhenReady(() => {
+
         scene.meshes.forEach(mesh => {
             if (mesh.name.includes("mirror")) {
                 const mirrorTexture = mesh.material.reflectionTexture;
@@ -589,6 +500,7 @@ function loadModel(path, debug = false) {
                 }
             }
         });
+        loadingScreen.hideLoadingUI();
     });
 
 }
