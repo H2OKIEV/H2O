@@ -52,6 +52,47 @@ export function start3DTour(modelPath, debug = false) {
 
         sceneCreated = true;
 
+        const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        const button = BABYLON.GUI.Button.CreateSimpleButton("screenshotButton", "Сделать скриншот");
+        button.width = "200px"; // Ширина кнопки
+        button.height = "50px"; // Высота кнопки
+        button.color = "white"; // Цвет текста
+        button.background = "blue"; // Цвет фона
+        button.cornerRadius = 20; // Скругленные углы
+        button.thickness = 2; // Толщина границ
+        button.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT; // Выравнивание по горизонтали
+        button.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP; // Выравнивание по вертикали
+        button.left = "10px"; // Отступ слева
+        button.top = "10px"; // Отступ сверху
+
+        // Добавляем обработчик события для кнопки
+        button.onPointerClickObservable.add(() => {
+            // 1. Скрываем кнопку
+            advancedTexture.isVisible = false;
+           scene.render();
+            // 2.  Используем requestAnimationFrame для задержки создания скриншота
+            requestAnimationFrame(() => {
+                // 3. Создаем скриншот
+                BABYLON.Tools.CreateScreenshotUsingRenderTarget(
+                  engine,
+                  camera,
+                  { width: 1920, height: 1080 },
+                  undefined,
+                  undefined,
+                  true,
+                  () => {
+                    // 4.  После того как скриншот сделан, возвращаем кнопку
+                    requestAnimationFrame(() => {
+                        advancedTexture.isVisible = true;
+                    });
+                  }
+                );
+            });
+          });
+
+        advancedTexture.addControl(button);
+
         // Ограничение высоты камеры
         scene.onBeforeRenderObservable.add(() => {
             if (camera.position.y < 1.5) {
@@ -104,6 +145,8 @@ export function start3DTour(modelPath, debug = false) {
                 }
             }
         });
+
+         
 
         scene.onPointerObservable.add((pointerInfo) => {
             switch (pointerInfo.type) {
@@ -285,19 +328,7 @@ function loadModel(path, debug = false) {
             scene
         );
 
-        statsFPS = new Stats();
-        statsFPS.showPanel(0); // Панель FPS
-        document.body.appendChild(statsFPS.dom);
-
-        statsMS = new Stats();
-        statsMS.showPanel(1); // Панель MS
-        statsMS.dom.style.cssText = 'position:absolute;top:40px;left:0;'; // Сдвиг для отображения рядом
-        document.body.appendChild(statsMS.dom);
-
-        statsMB = new Stats();
-        statsMB.showPanel(2); // Панель MB
-        statsMB.dom.style.cssText = 'position:absolute;top:0;left:80px;'; // Ещё один сдвиг
-        document.body.appendChild(statsMB.dom);
+      
 
 
 
@@ -352,7 +383,7 @@ function loadModel(path, debug = false) {
         // Настраиваем скорость передвижения
         camera.speed = 0.1;
 
-        let ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
+        /*let ssaoPipeline = new BABYLON.SSAO2RenderingPipeline("ssao", scene, {
             ssaoRatio: 0.5,       // Коэффициент разрешения SSAO
             blurRatio: 0.5        // Коэффициент разрешения размытия
 
@@ -364,7 +395,7 @@ function loadModel(path, debug = false) {
         ssaoPipeline.radius = 0.6;                 // Радиус выборки AO
         ssaoPipeline.totalStrength = 3.9;       // Интенсивность AO
         ssaoPipeline.base = 0.6;
-        scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);
+        scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", camera);*/
         // scene.postProcessRenderPipelineManager.attachPipelinesToRender(ssao, true);
         const fxaa = new BABYLON.FxaaPostProcess("fxaa", 1.0, camera);
 
@@ -479,6 +510,19 @@ function loadModel(path, debug = false) {
 
             }
             loadingScreen.loadingUIText = `Обновление текстур для зеркала`;
+            statsFPS = new Stats();
+            statsFPS.showPanel(0); // Панель FPS
+            document.body.appendChild(statsFPS.dom);
+    
+            statsMS = new Stats();
+            statsMS.showPanel(1); // Панель MS
+            statsMS.dom.style.cssText = 'position:absolute;top:50px;left:0;'; // Сдвиг для отображения рядом
+            document.body.appendChild(statsMS.dom);
+    
+            statsMB = new Stats();
+            statsMB.showPanel(2); // Панель MB
+            statsMB.dom.style.cssText = 'position:absolute;top:0;left:80px;'; // Ещё один сдвиг
+            document.body.appendChild(statsMB.dom);
             
         });
 
@@ -501,6 +545,7 @@ function loadModel(path, debug = false) {
             }
         });
         loadingScreen.hideLoadingUI();
+      
     });
 
 }
