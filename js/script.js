@@ -14,6 +14,7 @@ let sceneCreated = false;
 let engine;
 let scene;
 let camera;
+let advancedTexture;
 let statsFPS, statsMS, statsMB;
 let currentCircle; // Переменная для хранения текущего круга
 // Создаем группы столкновений (лучше использовать битовые маски)
@@ -25,6 +26,253 @@ export function stop3DTour() {
     engine.stopRenderLoop();
 };
 
+
+// Получаем GUI AdvancedTexture
+
+
+// Функция для создания текстового блока
+function createTextBlock(text, top, left, width) {
+    const textBlock = new BABYLON.GUI.TextBlock();
+    textBlock.text = text;
+    textBlock.color = "white"; // Цвет текста
+    textBlock.fontSize = 24; // Размер шрифта
+    textBlock.top = top;
+    textBlock.left = left;
+    textBlock.width = width;
+    textBlock.textWrapping = BABYLON.GUI.TextWrapping.WordWrap; // Автоматический перенос текста
+    advancedTexture.addControl(textBlock);
+    return textBlock;
+}
+
+
+BABYLON.DefaultLoadingScreen.prototype.displayLoadingUI = function () {
+
+    const canvas = document.getElementById('babylonjsLoading');
+
+    if (!canvas) {
+        console.warn("Default Loading Screen canvas is undefined. Ensure it is instantiated using engine's loadingScreen and 'displayLoadingUI' is not overwritten")
+        return;
+    }
+
+    // Убедитесь, что _canvasTexture, _plane, _advancedTexture и _button не существуют, чтобы избежать проблем при перезагрузке
+    if (this._canvasTexture) {
+        this._canvasTexture.dispose();
+    }
+    if (this._plane) {
+        this._plane.dispose();
+    }
+    if (this._advancedTexture) {
+        this._advancedTexture.dispose();
+    }
+    this._button = null;
+
+    // 1. Создание 2D канваса
+    const canvasWidth = 900;
+    const canvasHeight = 600;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+        console.error("Error: Could not get 2D rendering context from canvas.");
+        return;
+    }
+    // Фон
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // Закругленные углы
+    const borderRadius = 30;
+    ctx.beginPath();
+    ctx.moveTo(borderRadius, 0);
+    ctx.lineTo(canvasWidth - borderRadius, 0);
+    ctx.arcTo(canvasWidth, 0, canvasWidth, borderRadius, borderRadius);
+    ctx.lineTo(canvasWidth, canvasHeight - borderRadius);
+    ctx.arcTo(canvasWidth, canvasHeight, canvasWidth - borderRadius, canvasHeight, borderRadius);
+    ctx.lineTo(borderRadius, canvasHeight);
+    ctx.arcTo(0, canvasHeight, 0, canvasHeight - borderRadius, borderRadius);
+    ctx.lineTo(0, borderRadius);
+    ctx.arcTo(0, 0, borderRadius, 0, borderRadius);
+    ctx.closePath();
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.fill();
+
+
+    // Тень
+    ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+    ctx.shadowBlur = 1;
+    ctx.fill();
+
+    
+
+    // Контейнер для подсказок
+    const helpBlocksStartX = canvasWidth * 0.05;
+    let helpBlockY = 21.4286 + 17.6471 * 2 + 20;
+    const helpBlockHeight = 100;
+
+    const helpBlockStyle = {
+        color: "rgb(13, 68, 69)",
+    };
+
+    //  Подсказка 1
+    let helpBlockX = helpBlocksStartX
+    let iconPath = 'icon/icon-mouse.png'
+    this.drawHelpBlock(ctx, helpBlockX, helpBlockY, iconPath, "<b>Стрілки або клавіші</b><br><b>W-A-S-D</b><br>Рухайтеся вперед, назад <br>і повертайте", helpBlockStyle);
+
+    // Подсказка 2
+    helpBlockX += canvasWidth * 0.35;
+    iconPath = 'icon/icon-arrows.png';
+    this.drawHelpBlock(ctx, helpBlockX, helpBlockY, iconPath, "<b>Миша / тачпад</b><br>Клацніть лівою кнопкою миші<br>та утримуйте, <br>щоб оглянутись", helpBlockStyle);
+
+    // Подсказка 3
+    helpBlockX += canvasWidth * 0.35;
+    iconPath = 'icon/icon-left.png';
+    this.drawHelpBlock(ctx, helpBlockX, helpBlockY, iconPath, "<b>Клацніть де завгодно</b><br>Клацніть на потрібне місце <br>щоб перейти туди", helpBlockStyle);
+
+
+    // Заголовок
+    ctx.font = "bold 1.4em Arial, serif";
+    ctx.fillStyle = "rgb(13, 68, 69)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("ВИКОРИСТАННЯ ", canvasWidth / 2, 21.4286 + 17.6471);
+
+    // Разделительная линия
+    ctx.strokeStyle = "rgb(176, 181, 181)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(canvasWidth * 0.05, 21.4286 + 17.6471 * 2)
+    ctx.lineTo(canvasWidth * 0.95, 21.4286 + 17.6471 * 2);
+    ctx.stroke();
+    
+
+    // 2. Создание текстуры
+    if (this._canvasTexture) {
+        this._canvasTexture.dispose()
+    }
+
+    this._canvasTexture = new BABYLON.DynamicTexture(
+        "loadingScreenTexture",
+        { width: canvasWidth, height: canvasHeight },
+        scene,
+        true
+    );
+    this._canvasTexture.update(true, false, () => {
+        this._canvasTexture.getContext().drawImage(canvas, 0, 0);
+    });
+
+
+    // 3. Создание плоскости
+    if (this._plane) {
+        this._plane.dispose()
+    }
+    this._plane = BABYLON.MeshBuilder.CreatePlane(
+        "loadingScreenPlane",
+        { width: 2, height: 1 },
+        scene
+    );
+
+    const material = new BABYLON.StandardMaterial("loadingScreenMaterial", scene);
+    material.diffuseTexture = this._canvasTexture;
+    material.emissiveColor = new BABYLON.Color3(1, 1, 1); // Делаем текстуру яркой
+    this._plane.material = material;
+
+
+    this._plane.position = new BABYLON.Vector3(0, 1.5, 5); // Расположите перед камерой
+
+
+    // 4. Создание интерактивного слоя GUI
+    /*this._advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI(
+      "loadingScreenUI",
+      true,
+        scene
+    );
+  
+    // 5. Создание кнопки "Понятно!"
+      const button = Button.CreateSimpleButton("closeButton", "Зрозуміло!");
+      button.width = "10em";
+      button.height = "2.5em";
+      button.color = "rgb(13, 68, 69)";
+      button.background = "white";
+      button.fontSize = 20;
+      button.paddingTop = "0.2em";
+      button.paddingBottom = "0.2em"
+      button.cornerRadius = 7;
+      button.thickness = 1
+      button.left = "20%";
+      button.top = "80%";
+      button.onPointerUpObservable.add(() => {
+        this.hideLoadingUI();
+        // console.log("clicked")
+      });
+  
+      button.hoverCursor = 'pointer';
+    
+      this._advancedTexture.addControl(button);
+    this._button = button;*/
+
+    this._loadingUIText = null;
+};
+
+BABYLON.DefaultLoadingScreen.prototype.drawHelpBlock = function (ctx, helpBlockX, helpBlockY, iconPath, helpText, style) {
+    const iconSize = 60;
+    const textStartYOffset = 10;
+    const maxTextWidth = 200;
+    ctx.fillStyle = style.color;
+    const img = new Image();
+    img.src = iconPath;
+    img.onload = () => {
+        // Вычисляем координату x для иконки, чтобы отцентрировать ее
+        const iconX = helpBlockX + (maxTextWidth - iconSize) / 2;
+        ctx.drawImage(img, iconX, helpBlockY, iconSize, iconSize);
+        const textLines = helpText.split("<br>");
+
+        let textStartY = helpBlockY + iconSize + textStartYOffset;
+        let currentY = textStartY;
+        textLines.forEach(line => {
+          ctx.font = "1em Arial, serif";
+            if (line.startsWith("<b>") && line.endsWith("</b>")) {
+                ctx.font = "bold 1em Arial, serif";
+                line = line.replace("<b>", "").replace("</b>", "");
+            }
+            const textWidth = ctx.measureText(line).width;
+            const textStartX = helpBlockX + (maxTextWidth - textWidth) / 2;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            ctx.fillText(line, textStartX, currentY);
+            currentY += 18;
+        });
+    };
+};
+
+BABYLON.DefaultLoadingScreen.prototype.hideLoadingUI = function () {
+    if (this._plane) {
+        this._plane.dispose();
+        this._plane = null;
+    }
+    if (this._canvasTexture) {
+        this._canvasTexture.dispose();
+        this._canvasTexture = null;
+    }
+    if (this._button) {
+        this._advancedTexture.removeControl(this._button);
+        this._button = null;
+    }
+    if (this._advancedTexture) {
+        this._advancedTexture.dispose();
+        this._advancedTexture = null;
+    }
+    document.getElementById("babylonjsLoading").style.display = "none";
+
+    console.log("scene is now loaded");
+};
+
+
+
+
 export function start3DTour(modelPath, debug = false) {
     if (!sceneCreated) {
 
@@ -32,27 +280,22 @@ export function start3DTour(modelPath, debug = false) {
         engine.resize();
         scene = new BABYLON.Scene(engine);
 
-        // loadingScreen = new BABYLON.DefaultLoadingScreen(canvas, "Loading...");
-        // engine.loadingScreen = loadingScreen;
-        loadingScreen.displayLoadingUI();
 
 
+        const customLoadingScreen = new BABYLON.DefaultLoadingScreen("babylonjsLoading", "Loading...");
+        engine.loadingScreen = customLoadingScreen;
+        engine.displayLoadingUI();
 
-
-
-
-
-
-        // scene.loadingUIText = "Загрузка...";  // Текст для отображения на экране
-        //scene.loadingScreen = new BABYLON.DefaultLoadingScreen(engine, scene);
-        // scene.loadingScreen.displayLoadingUI(); // Показываем экран загрузки
-        // Замените на путь к вашему GBL файлу
-
+        setTimeout(() => {
         loadModel(modelPath, debug);
+    }, 1000); // Задержка в миллисекундах
 
         sceneCreated = true;
 
         const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        //advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
 
         const button = BABYLON.GUI.Button.CreateSimpleButton("screenshotButton", "Сделать скриншот");
         button.width = "200px"; // Ширина кнопки
@@ -70,26 +313,26 @@ export function start3DTour(modelPath, debug = false) {
         button.onPointerClickObservable.add(() => {
             // 1. Скрываем кнопку
             advancedTexture.isVisible = false;
-           scene.render();
+            scene.render();
             // 2.  Используем requestAnimationFrame для задержки создания скриншота
             requestAnimationFrame(() => {
                 // 3. Создаем скриншот
                 BABYLON.Tools.CreateScreenshotUsingRenderTarget(
-                  engine,
-                  camera,
-                  { width: 1920, height: 1080 },
-                  undefined,
-                  undefined,
-                  true,
-                  () => {
-                    // 4.  После того как скриншот сделан, возвращаем кнопку
-                    requestAnimationFrame(() => {
-                        advancedTexture.isVisible = true;
-                    });
-                  }
+                    engine,
+                    camera,
+                    { width: 1920, height: 1080 },
+                    undefined,
+                    undefined,
+                    true,
+                    () => {
+                        // 4.  После того как скриншот сделан, возвращаем кнопку
+                        requestAnimationFrame(() => {
+                            advancedTexture.isVisible = true;
+                        });
+                    }
                 );
             });
-          });
+        });
 
         advancedTexture.addControl(button);
 
@@ -146,7 +389,7 @@ export function start3DTour(modelPath, debug = false) {
             }
         });
 
-         
+
 
         scene.onPointerObservable.add((pointerInfo) => {
             switch (pointerInfo.type) {
@@ -307,34 +550,26 @@ function loadModel(path, debug = false) {
         loadingScreen.loadingUIText = `Загрузка модели: ${Math.round(percentage)}%`;
     }
 
+    //loadingScreen.loadingUIText = `Загрузка окружения`;
+    const hdrTexture = new BABYLON.HDRCubeTexture(pathhdr + "envMap.hdr", scene, 512);
+    // hdrTexture.level = 0.5;
+    //scene.activeCamera.exposure = 0.1; 
+    // Устанавливаем как карту окружения
+    scene.environmentTexture = hdrTexture;
+
+    var dome = new BABYLON.PhotoDome(
+        "testdome",
+        pathhdr + "environmentTexture.jpg",
+        {
+            resolution: 32,
+            size: 1000,
+            useDirectMapping: true
+        },
+        scene
+    );
+
     BABYLON.SceneLoader.ImportMesh("", "./", path, scene, (meshes) => {
         console.log("Сцена создана.");
-
-        loadingScreen.loadingUIText = `Загрузка окружения`;
-        const hdrTexture = new BABYLON.HDRCubeTexture(pathhdr + "envMap.hdr", scene, 512);
-        // hdrTexture.level = 0.5;
-        //scene.activeCamera.exposure = 0.1; 
-        // Устанавливаем как карту окружения
-        scene.environmentTexture = hdrTexture;
-
-        var dome = new BABYLON.PhotoDome(
-            "testdome",
-            pathhdr + "environmentTexture.jpg",
-            {
-                resolution: 32,
-                size: 1000,
-                useDirectMapping: true
-            },
-            scene
-        );
-
-      
-
-
-
-
-
-
 
         // Создаем кольцо (торус)
         currentCircle = BABYLON.MeshBuilder.CreateTorus("ring", {
@@ -509,26 +744,26 @@ function loadModel(path, debug = false) {
 
 
             }
-            loadingScreen.loadingUIText = `Обновление текстур для зеркала`;
+            //loadingScreen.loadingUIText = `Обновление текстур для зеркала`;
             statsFPS = new Stats();
             statsFPS.showPanel(0); // Панель FPS
             document.body.appendChild(statsFPS.dom);
-    
+
             statsMS = new Stats();
             statsMS.showPanel(1); // Панель MS
             statsMS.dom.style.cssText = 'position:absolute;top:50px;left:0;'; // Сдвиг для отображения рядом
             document.body.appendChild(statsMS.dom);
-    
+
             statsMB = new Stats();
             statsMB.showPanel(2); // Панель MB
             statsMB.dom.style.cssText = 'position:absolute;top:0;left:80px;'; // Ещё один сдвиг
             document.body.appendChild(statsMB.dom);
-            
+
         });
 
 
     }, function (progress) {
-        progressCallback(progress)
+        // progressCallback(progress)
     });
 
 
@@ -544,8 +779,8 @@ function loadModel(path, debug = false) {
                 }
             }
         });
-        loadingScreen.hideLoadingUI();
-      
+        //loadingScreen.hideLoadingUI();
+
     });
 
 }

@@ -21,7 +21,7 @@
             z-index: 0;
         }
 
-       
+
         #modal {
             display: none;
             position: fixed;
@@ -45,14 +45,29 @@
             align-items: center;
         }
 
-        #renderCanvas {
+        .babylonjsLoading {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            /* Установим z-index для экрана загрузки */
         }
 
-        .babylonjsLoadingDiv {
-            z-index: 1000; /* Установим z-index для экрана загрузки */
+        #renderCanvas {
+            position: absolute; /* Задайте абсолютное позиционирование */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 900;
         }
+
+
 
         #closeModal {
             position: absolute;
@@ -63,6 +78,7 @@
             background: none;
             border: none;
             cursor: pointer;
+            z-index: 950;
         }
     </style>
 </head>
@@ -75,10 +91,14 @@
 
     <div id="modal">
         <div id="modalContent">
-            <canvas id="renderCanvas" style="width: 100%; height: 100%;"></canvas>
+            <canvas id="babylonjsLoading" ></canvas>
+            <canvas id="renderCanvas" ></canvas>
+           
             <button id="closeModal">✖</button>
         </div>
     </div>
+
+
     <script type="module" src="js/script.js"></script>
 
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
